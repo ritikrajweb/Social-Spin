@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Social Spin</title>
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#090a0f">
+    
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Social Spin","short_name":"Social Spin","display":"standalone","background_color":"#090a0f","theme_color":"#090a0f","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiMwOTBhMGYiLz48dGV4dCB4PSI1MCIgeT0iNTUiIGZvbnQtc2l6ZT0iNDAiIGZpbGw9IiMwMGQ0ZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXdlaWdodD0iYm9sZCI+U1M8L3RleHQ+PC9zdmc+","sizes":"192x192","type":"image/svg+xml"}]}'>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
+
+    <style>
+        /* --- 1. MODERN DARK MATERIAL DESIGN --- */
+        :root {
+            --bg-base: #090a0f;
+            --surface-card: #13151f;
+            --surface-raised: #1c1f2e;
+            --border-highlight: rgba(255, 255, 255, 0.08);
+            --border-shadow: rgba(0, 0, 0, 0.5);
+            --text-main: #f0f2f8;
+            --text-muted: #8b8e9e;
+            --accent-primary: #00d4ff; 
+        }
+
+        body.phase-2 { --accent-primary: #9d4edd; } 
+        body.phase-3 { --accent-primary: #ff2a5f; } 
+        body.phase-4 { --accent-primary: #ff3b3b; } 
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+        html, body {
+            width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-base); color: var(--text-main);
+            background-image: radial-gradient(circle at 50% 0%, #13151f 0%, var(--bg-base) 80%);
+            transition: background-color 0.4s ease;
+        }
+
+        .app-container { 
+            width: 100%; 
+            height: 100vh; height: 100dvh; 
+            position: relative; overflow: hidden; 
+        }
+        
+        .screen { 
+            width: 100%; height: 100%; position: absolute; top: 0; left: 0; 
+            display: flex; flex-direction: column; 
+            overflow-y: auto; overflow-x: hidden;
+            padding: 20px; padding-bottom: 90px; 
+            transition: opacity 0.3s ease, transform 0.3s ease; 
+        }
+        .screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.96); }
+
+        .screen-inner {
+            margin: auto; width: 100%; max-width: 420px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            position: relative;
+        }
+
+        /* --- 2. LOBBY UI --- */
+        .logo { font-size: clamp(3rem, 10vw, 4rem); font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--text-main); margin-bottom: 25px; text-align: center; line-height: 1; text-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+        
+        .material-card {
+            background: linear-gradient(145deg, var(--surface-card), #0d0f16);
+            border-top: 1px solid var(--border-highlight); border-left: 1px solid var(--border-highlight);
+            border-right: 1px solid var(--border-shadow); border-bottom: 1px solid var(--border-shadow);
+            border-radius: 20px; padding: 25px 20px; width: 100%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 15px;
+        }
+
+        .mode-selector { display: flex; background: #07080b; border-radius: 12px; padding: 5px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.5); }
+        .mode-btn { flex: 1; padding: 12px; background: transparent; border: none; color: var(--text-muted); border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; }
+        .mode-btn.active { background: var(--surface-raised); color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+
+        .input-group { display: flex; gap: 10px; }
+        input[type="text"] {
+            flex-grow: 1; padding: 14px 16px; border-radius: 12px; border: 1px solid transparent; 
+            background: #07080b; color: var(--text-main); font-size: 1.1rem; font-weight: 600; 
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.5); transition: all 0.2s;
+        }
+        input[type="text"]:focus { outline: none; border-color: var(--accent-primary); box-shadow: inset 0 2px 6px rgba(0,0,0,0.5), 0 0 12px rgba(0,212,255,0.1); }
+        
+        .btn { padding: 14px; border-radius: 12px; border: none; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; text-transform: uppercase; letter-spacing: 1px; }
+        .btn-add { background: var(--surface-raised); color: var(--text-main); width: 60px; font-size: 1.5rem; border-top: 1px solid var(--border-highlight); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .btn-add:active { transform: translateY(2px); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+        
+        .btn-primary { background: linear-gradient(135deg, var(--text-main), #b8bbc6); color: var(--bg-base); width: 100%; box-shadow: 0 6px 15px rgba(255,255,255,0.1); }
+        .btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 8px rgba(255,255,255,0.1); }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; background: var(--surface-raised); color: var(--text-muted); }
+        
+        #player-list { display: flex; flex-wrap: wrap; gap: 8px; min-height: 44px; }
+        .player-tag { background: #07080b; border: 1px solid var(--surface-raised); padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 1.05rem; cursor: pointer; color: var(--text-main); box-shadow: 0 2px 5px rgba(0,0,0,0.3);}
+        .player-tag:hover { border-color: #ff2a5f; color: #ff2a5f; text-decoration: line-through; }
+
+        .btn-install {
+            background: linear-gradient(145deg, #1c1f2e, #13151f); border: 1px solid var(--accent-primary); 
+            color: var(--accent-primary); padding: 10px 20px; border-radius: 30px; 
+            font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; 
+            box-shadow: 0 4px 12px rgba(0,212,255,0.2); display: none; 
+            align-items: center; gap: 8px; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .btn-install:active { transform: scale(0.95); }
+
+        /* --- 3. FLOATING ELEMENTS & WATERMARK --- */
+        .watermark-container { position: fixed; bottom: 25px; left: 20px; z-index: 10; pointer-events: none; transition: opacity 0.3s ease; }
+        .watermark { font-size: 0.8rem; letter-spacing: 3px; color: rgba(255,255,255,0.25); font-weight: 700; text-transform: uppercase; }
+
+        .fab-feedback {
+            position: fixed; bottom: 20px; right: 20px;
+            background: linear-gradient(135deg, #25D366, #128C7E); color: #fff;
+            border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; padding: 12px 18px;
+            display: flex; align-items: center; gap: 8px;
+            font-weight: 700; font-size: 0.95rem; font-family: 'Rajdhani', sans-serif;
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4); cursor: pointer;
+            z-index: 999; transition: transform 0.2s, opacity 0.3s ease;
+        }
+        .fab-feedback:active { transform: scale(0.95); }
+
+        .btn-back {
+            position: absolute; top: 0px; left: 0px;
+            background: rgba(255,255,255,0.05); border: 1px solid var(--border-highlight);
+            color: var(--text-main); padding: 8px 16px; border-radius: 20px;
+            display: flex; align-items: center; gap: 6px;
+            font-weight: 700; font-size: 0.9rem; cursor: pointer;
+            z-index: 50; transition: background 0.2s; text-transform: uppercase; letter-spacing: 1px;
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        }
+        .btn-back:active { transform: scale(0.95); }
+
+        @media (max-height: 500px) {
+            .watermark-container, .fab-feedback { opacity: 0; pointer-events: none; }
+            .screen { padding-bottom: 20px; } 
+        }
+
+        /* --- 4. ARENA PHYSICS --- */
+        .arena-wrapper { position: relative; width: 100%; max-width: 380px; aspect-ratio: 1/1; display: flex; justify-content: center; align-items: center; margin: auto; margin-top: 20px;}
+        
+        .arena-ring { 
+            position: absolute; width: 85%; height: 85%; border-radius: 50%; 
+            background: radial-gradient(circle at 50% 50%, #0d0f16 0%, #07080b 100%); 
+            border-top: 1px solid var(--border-highlight); border-bottom: 1px solid var(--border-shadow); 
+            box-shadow: inset 0 10px 30px rgba(0,0,0,0.8), 0 10px 25px rgba(0,0,0,0.5); 
+        }
+        
+        .arena-glow { position: absolute; width: 85%; height: 85%; border-radius: 50%; box-shadow: 0 0 40px var(--accent-primary); opacity: 0.15; transition: box-shadow 0.4s, opacity 0.4s; }
+        
+        .bottle-container { 
+            width: 14%; height: 44%; position: absolute; cursor: grab; z-index: 5;
+            top: 50%; left: 50%; transform: translate(-50%, -50%); transform-origin: center center; 
+            will-change: transform; 
+        }
+        
+        .bottle-svg { width: 100%; height: 100%; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)); }
+
+        .player-node { 
+            position: absolute; font-size: clamp(0.9rem, 3vw, 1.1rem); font-weight: 700; padding: 10px 16px; border-radius: 12px; 
+            background: linear-gradient(145deg, var(--surface-raised), var(--surface-card)); 
+            border-top: 1px solid var(--border-highlight); border-bottom: 1px solid var(--border-shadow);
+            transition: transform 0.3s ease, color 0.3s ease; z-index: 2; color: var(--text-muted); 
+            transform: translate(-50%, -50%); text-transform: capitalize; will-change: transform;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4); white-space: nowrap;
+        }
+        .player-node.glowing { color: var(--text-main); border-color: var(--accent-primary); box-shadow: 0 0 15px rgba(0,212,255,0.2); }
+        .player-node.selected { 
+            transform: translate(-50%, -50%) scale(1.3); color: var(--bg-base); 
+            background: linear-gradient(135deg, var(--text-main), #b8bbc6); 
+            z-index: 10; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+        }
+
+        .hud-status { text-align: center; width: 100%; z-index: 10; margin-top: 40px;}
+        .hud-phase { font-weight: 800; font-size: clamp(1.1rem, 4vw, 1.3rem); letter-spacing: 5px; color: var(--accent-primary); text-transform: uppercase; transition: color 0.4s; text-shadow: 0 2px 10px rgba(0,0,0,0.8);}
+        .hud-curse { margin-top: 8px; display: inline-block; font-size: 0.85rem; border: 1px solid var(--accent-primary); color: var(--accent-primary); background: rgba(0,0,0,0.4); padding: 4px 14px; border-radius: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; display: none; }
+
+        /* --- 5. TENSION ENGINE MODAL --- */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 6, 8, 0.95); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 2000; overflow-y: auto; padding: 20px;}
+        .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+        
+        .modal-content { width: 100%; max-width: 420px; transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); padding: 35px 25px; text-align: center; margin: auto;}
+        .modal-overlay.visible .modal-content { transform: scale(1); }
+
+        .tension-state { animation: pulseScale 1.2s infinite; border-color: var(--accent-primary); }
+        @keyframes pulseScale { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 20px rgba(0,212,255,0.1); } }
+
+        .modal-header { font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 3px; font-weight: 800; margin-bottom: 12px; }
+        .modal-title { font-size: clamp(2rem, 6vw, 2.4rem); font-weight: 800; margin-bottom: 24px; color: var(--text-main); text-transform: uppercase; line-height: 1.1; text-shadow: 0 4px 12px rgba(0,0,0,0.6);}
+        .modal-task { font-size: clamp(1.2rem, 4vw, 1.35rem); line-height: 1.45; color: var(--text-main); font-weight: 500; min-height: 85px; }
+        
+        .loading-text { font-size: 1.15rem; font-style: italic; color: var(--text-muted); animation: pulseOpacity 1.5s infinite; }
+        @keyframes pulseOpacity { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+
+        .highlight-target { color: var(--accent-primary); font-weight: 800; text-transform: capitalize; }
+        .highlight-secondary { color: var(--text-main); font-weight: 800; border-bottom: 2px solid var(--surface-raised); padding-bottom: 2px;}
+
+        .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 35px; }
+        .modal-actions.full { grid-template-columns: 1fr; }
+        
+        .btn-modal { padding: 14px; border-radius: 12px; border: none; font-weight: 800; font-size: clamp(0.95rem, 3vw, 1.05rem); cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: transform 0.1s, box-shadow 0.2s;}
+        .btn-truth { background: linear-gradient(145deg, var(--surface-raised), var(--surface-card)); border-top: 1px solid var(--border-highlight); color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+        .btn-truth:active { transform: translateY(2px); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+        .btn-dare { background: linear-gradient(135deg, var(--text-main), #b8bbc6); color: var(--bg-base); box-shadow: 0 6px 15px rgba(255,255,255,0.1); }
+        .btn-dare:active { transform: translateY(2px); }
+        .btn-chicken { background: #07080b; color: #ff2a5f; border: 1px solid rgba(255, 42, 95, 0.4); }
+        
+        .btn-share { grid-column: 1 / -1; background: var(--surface-raised); color: var(--text-main); margin-top: 5px; font-size: 0.95rem; border-top: 1px solid var(--border-highlight); display: flex; justify-content: center; align-items: center; gap: 8px;}
+    </style>
+</head>
+<body>
+
+    <div class="watermark-container">
+        <div class="watermark">MADE BY ऋतिक</div>
+    </div>
+
+    <button class="fab-feedback dev-trigger" title="Send Feedback">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+    </button>
+
+    <div class="app-container">
+        
+        <div id="setup-screen" class="screen">
+            <div class="screen-inner">
+                <h1 class="logo">Social Spin</h1>
+                
+                <div class="material-card">
+                    <div class="mode-selector">
+                        <button class="mode-btn" data-mode="classic">Classic</button>
+                        <button class="mode-btn active" data-mode="ai">Smart Engine</button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <input type="text" id="player-input" placeholder="Player Name..." autocomplete="off">
+                        <button id="add-player-btn" class="btn btn-add">+</button>
+                    </div>
+                    
+                    <div id="player-list"></div>
+                    
+                    <button id="start-game-btn" class="btn btn-primary" disabled>Start Spinning</button>
+                </div>
+
+                <button id="install-app-btn" class="btn-install">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                    Install App
+                </button>
+            </div>
+        </div>
+
+        <div id="game-screen" class="screen hidden">
+            <div class="screen-inner">
+                <button id="back-to-lobby-btn" class="btn-back">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                    Roster
+                </button>
+
+                <div class="hud-status">
+                    <div class="hud-phase" id="level-display">LEVEL 1: ICEBREAKER</div>
+                    <div class="hud-curse" id="curse-banner">Active Curse!</div>
+                </div>
+
+                <div class="arena-wrapper">
+                    <div class="arena-glow"></div>
+                    <div class="arena-ring" id="arena">
+                        <div class="bottle-container" id="bottle">
+                            <svg class="bottle-svg" viewBox="0 0 100 300" xmlns="http://www.w3.org/2000/svg">
+                                <defs>
+                                    <linearGradient id="bottleGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" stop-color="#1c1f2e" />
+                                        <stop offset="50%" stop-color="#2a2d3d" />
+                                        <stop offset="100%" stop-color="#13151f" />
+                                    </linearGradient>
+                                </defs>
+                                <path d="M25 300 L25 130 C25 80, 75 80, 75 130 L75 300 Z" fill="url(#bottleGrad)" stroke="var(--accent-primary)" stroke-width="2.5"/>
+                                <path d="M42 130 L42 20 C42 5, 58 5, 58 20 L58 130 Z" fill="url(#bottleGrad)" stroke="var(--accent-primary)" stroke-width="2.5"/>
+                                <rect x="35" y="0" width="30" height="15" fill="#f0f2f8" rx="3" filter="drop-shadow(0 2px 4px rgba(0,0,0,0.5))"/>
+                                <line x1="35" y1="140" x2="35" y2="280" stroke="rgba(255,255,255,0.15)" stroke-width="4" stroke-linecap="round"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal-overlay">
+        <div class="material-card modal-content" id="modal-content">
+            <div class="modal-header" id="modal-header">TARGET LOCKED</div>
+            <h2 class="modal-title" id="modal-title"></h2>
+            <div class="modal-task" id="modal-task-text"></div>
+            <div class="modal-actions" id="modal-buttons"></div>
+        </div>
+    </div>
+
+    <script>
+        /** ==========================================
+         * 1. WHITE-HAT FINGERPRINTING & DEVICE UUID
+         * ========================================== */
+        const DeviceFingerprint = {
+            getID: () => {
+                let id = localStorage.getItem('arena_stealth_id');
+                if (!id) {
+                    const randomPart = Math.random().toString(36).substring(2, 15);
+                    const timePart = Date.now().toString(36);
+                    let os = 'unk';
+                    try {
+                        const parser = new UAParser();
+                        os = parser.getOS().name ? parser.getOS().name.replace(/[^a-zA-Z]/g, '').substring(0,4) : 'unk';
+                    } catch(e) {}
+                    id = `dev_${os}_${timePart}_${randomPart}`;
+                    localStorage.setItem('arena_stealth_id', id);
+                }
+                return id;
+            }
+        };
+
+        /** ==========================================
+         * 2. PWA INSTALLATION ENGINE
+         * ========================================== */
+        let deferredPrompt;
+        const installBtn = document.getElementById('install-app-btn');
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault(); 
+            deferredPrompt = e; 
+            installBtn.style.display = 'flex'; 
+        });
+
+        installBtn.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') installBtn.style.display = 'none';
+                deferredPrompt = null;
+            }
+        });
+
+        // Keyboard Resize Handler
+        const initHeight = window.innerHeight;
+        const setAppHeight = () => {
+            document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
+            if (window.innerHeight < initHeight - 150) {
+                document.body.classList.add('keyboard-open');
+            } else {
+                document.body.classList.remove('keyboard-open');
+            }
+        };
+        window.addEventListener('resize', setAppHeight); setAppHeight();
+
+        /** ==========================================
+         * 3. SUPABASE TELEMETRY (GOD-MODE ENABLED)
+         * ========================================== */
+        const supabaseUrl = 'https://wzzirtyllphebfajzyqj.supabase.co'; 
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6emlydHlsbHBoZWJmYWp6eXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3ODQ1NjEsImV4cCI6MjA5MDM2MDU2MX0.5QynQnEaR6ZRVmg6QnvExukcuM7rRYIFOXZ1XmFv0UY'; 
+        let supabaseClient = null;
+        if(supabaseUrl) supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+
+        const logEvent = async (eventName, data = {}) => {
+            if (!supabaseClient) return;
+            try {
+                const parser = new UAParser(); const res = parser.getResult();
+                const payload = {
+                    device_id: DeviceFingerprint.getID(), 
+                    event_type: eventName, 
+                    session_data: data,
+                    device: res.device.model || res.device.vendor || "Mobile",
+                    os: res.os.name || "Unknown", browser: res.browser.name,
+                    timestamp: new Date().toISOString()
+                };
+                supabaseClient.from('arena_telemetry').insert([payload]).then();
+            } catch (e) {} 
+        };
+
+        window.addEventListener('DOMContentLoaded', () => { logEvent('app_opened'); });
+
+        document.querySelectorAll('.dev-trigger').forEach(btn => {
+            btn.onclick = () => {
+                logEvent('whatsapp_btn_clicked');
+                window.open('https://wa.me/918986937029?text=Hey%20Ritik!%20I%20played%20Social%20Spin%20and%20wanted%20to%20share%20some%20thoughts%2Ffeedback%20with%20you.', '_blank');
+            };
+        });
+
+        const executeNativeShare = async (text, player) => {
+            const shareText = `Social Spin just asked ${player}:\n\n"${text}"\n\nDare to play: [YourLink.com]`;
+            if (navigator.share) {
+                try { await navigator.share({ title: 'Social Spin', text: shareText }); logEvent('share_used', { target: player }); } catch (e) {}
+            } else {
+                navigator.clipboard.writeText(shareText); alert("Link copied! Paste it in your WhatsApp/Insta group.");
+            }
+        };
+
+        /** ==========================================
+         * 4. COGNITIVE ENGINE (Player-Specific Recency Weights)
+         * ========================================== */
+        const CognitiveEngine = {
+            currentSession: 1,
+            
+            init: () => {
+                let memory = JSON.parse(localStorage.getItem('arena_cognitive_vault') || '{"session":0, "history":{}}');
+                memory.session += 1;
+                localStorage.setItem('arena_cognitive_vault', JSON.stringify(memory));
+                CognitiveEngine.currentSession = memory.session;
+            },
+            
+            normalize: (name) => name.toLowerCase().replace(/[^a-z0-9]/g, ''),
+            
+            getIndex: (player, phase, type, length) => {
+                let memory = JSON.parse(localStorage.getItem('arena_cognitive_vault'));
+                let pKey = CognitiveEngine.normalize(player);
+                let weights = [];
+                let totalWeight = 0;
+
+                for(let i=0; i<length; i++) {
+                    let key = `${pKey}_${phase}_${type}_${i}`;
+                    let lastSeen = memory.history[key];
+                    let weight = 1.0; 
+
+                    if (lastSeen !== undefined) {
+                        let age = CognitiveEngine.currentSession - lastSeen;
+                        if (age === 0) weight = 0.0;       // 0% chance this session
+                        else if (age === 1) weight = 0.2;  // 20% chance (1 session ago)
+                        else if (age === 2) weight = 0.4;  // 40% chance
+                        else if (age === 3) weight = 0.6;  // 60% chance
+                        else if (age === 4) weight = 0.8;  // 80% chance
+                    }
+
+                    weights.push(weight);
+                    totalWeight += weight;
+                }
+
+                if(totalWeight === 0) return Math.floor(Math.random() * length);
+
+                let random = Math.random() * totalWeight;
+                let sum = 0;
+                for(let i=0; i<length; i++) {
+                    sum += weights[i];
+                    if(random <= sum) return i;
+                }
+                return 0;
+            },
+            
+            logPrompt: (player, phase, type, idx) => {
+                let memory = JSON.parse(localStorage.getItem('arena_cognitive_vault'));
+                let pKey = CognitiveEngine.normalize(player);
+                let key = `${pKey}_${phase}_${type}_${idx}`;
+                memory.history[key] = CognitiveEngine.currentSession; 
+                localStorage.setItem('arena_cognitive_vault', JSON.stringify(memory));
+            }
+        };
+
+        /** ==========================================
+         * 5. THE EXHAUSTIVE 200+ HINGLISH DATABASE
+         * ========================================== */
+        const DB = {
+            l1: { 
+                truth: [
+                    "Class mein chalte waqt, kya tum pretend karte ho ki phone chala rahe ho taaki samne wale se eye contact na karna pade?",
+                    "Honestly batao, subah khud ke looks ko 10 mein se kitna rate karte ho?",
+                    "Is group mein sabse zyada apni dressing aur 'vibe' ka show-off kaun karta hai?",
+                    "Aakhri baar kisi baat pe overthink karke khud ka mood kab kharab kiya tha?",
+                    "Kya tumne kabhi intentionally kisi ka text ignore kiya hai taaki tum 'busy dikho'?",
+                    "Tumhara screen time sabse zyada kis app pe jata hai, aur din mein kitne ghante?",
+                    "Sach batao, kya tumne kabhi campus aane se pehle outfit sirf isliye change kiya kyunki 'wo' aane wala tha?",
+                    "Is circle mein kaun hai jo actually bohot smart hai par dumb act karta hai taaki log comfortable rahein?",
+                    "Aakhri baar kab kisi ki physical appearance ki jhoothi tareef ki thi taaki wo bura na maane?",
+                    "Group Point: 1, 2, 3 pe us insaan ki taraf point karo jiska music taste sabse weird hai.",
+                    "Group Point: Us insaan ki taraf point karo jiske phone mein sabse zyada unread WhatsApp messages pade hain.",
+                    "Class mein professor se eye contact avoid karne ki tumhari ninja technique kya hai?",
+                    "Kabhi kisi stranger ke baare mein apne dimaag mein puri fake love story banayi hai?",
+                    "Tumhara sabse lame excuse kya raha hai dosto ka plan cancel karne ka?",
+                    "Kya tumne kabhi akele room mein sheeshe ke saamne khade hokar kisi future argument ki practice ki hai?",
+                    "Aakhri baar kab kisi cringe reel ko secretly like kiya tha par dosto ko bola 'ye kya bakwas hai'?",
+                    "Kya tumne kabhi kisi ke text ka reply jaldi na aane par apna bheja hua text 'delete for everyone' kiya hai?",
+                    "Group Point: Sabse zyada aalas (laziness) is group mein kiske andar hai?",
+                    "Tumhara go-to comfort food kya hai jab tum actually sad ya stressed hote ho?",
+                    "Kabhi apne aap ko WhatsApp pe notes ya reminders bheje hain? Aakhri reminder kya tha?",
+                    "Agar tumhe kal invisible hone ka superpower mil jaye, toh campus mein sabse pehle kya karoge?",
+                    "Kya tumne kabhi kisi test mein fail hone par ghar walo se marks chupaye hain?",
+                    "Is group mein sabse zyada relatable memes tumhe kon bhejta hai?",
+                    "Sach batao, kya tum kabhi mirror mein dekh kar actually sochte ho ki 'bhai main bohot hot lag raha hu'?",
+                    "Aakhri baar university mein kab bina wajah roye the aur kisi ko pata nahi chala?"
+                ],
+                dare: [
+                    "{PlayerB} ko dhyaan se dekho. Unke face ya outfit pe aisi kya cheez hai jo tumne pehle notice nahi ki thi?",
+                    "Agle 3 rounds tak tumhe bilkul straight, rigid aur confident posture mein baithna hai.",
+                    "Apni phone gallery kholo. Jo aakhri selfie click ki par kahin post nahi ki, wo chup-chaap group ko dikhao.",
+                    "{PlayerC} ki walking style ya body language silently mimic karke dikhao.",
+                    "Agle 2 rounds tak, apni aawaz ka tone bilkul serious aur 'intellectual' professor ki tarah rakho.",
+                    "Apna phone uthao aur apni aakhri 3 Google search loud padh ke sunao bina sharmaye.",
+                    "Tumhe 30 seconds milte hain. {PlayerB} ki 3 genuine aur deep tareefein karo bina hase.",
+                    "Apni playlist ka sabse embarrassing gaana 10 seconds tak loud play karo.",
+                    "Group Point: Sab aankhein band karo. Tumhe room mein kisi ek insaan ka naam guess karna hai uske joote dekh kar.",
+                    "Agle 5 minute ke liye, tumhe normal smile karne ki jagah ek creepy smirk deni hai jab bhi koi tumse baat kare.",
+                    "Apne phone ka wallpaper sabko dikhao aur uske peeche ki story ya reason batao.",
+                    "{PlayerB} ke baalon ko exactly 10 seconds tak dhyaan se dekho aur fir 1 se 10 ke beech unka hairstyle rate karo.",
+                    "Apne wallet ya bag se sabse weird cheez nikal kar dikhao jo tum hamesha apne paas rakhte ho.",
+                    "Group Point: 1, 2, 3 pe sab point karo us insaan ki taraf jo is dare se sabse zyada darr raha hai. Wo insaan 10 squats karega.",
+                    "Agle 2 rounds tak, tumhe apne saare answers gaana gaa kar dene hain.",
+                    "Apni aakhri bhejhi hui voice note play karke sabko sunao.",
+                    "{PlayerC} ko ek bohot hi cringe romantic pickup line bol kar dikhao.",
+                    "Tumhe 1 minute milta hai apne face pe ek ajeeb sa expression banane ka jab tak {PlayerB} na hass de.",
+                    "Apni aakhri 3 WhatsApp status views list check karo aur top ke 3 naam loud batao.",
+                    "Bina hase 'Kacha Papad, Pakka Papad' 5 baar tez speed mein bol kar dikhao.",
+                    "Apni screen brightness full karo aur phone ko 1 minute ke liye table ke center mein rakh do.",
+                    "{PlayerB} ko apni aankhon se exactly 15 seconds tak 'ghooro' (stare karo) bina palke jhapkaye.",
+                    "Tumhe agle ek round tak bina bole sirf ishare (charades) se baat karni hai.",
+                    "Apne dosto ko dikhao ki tum 'Sad' hone par kaisa face banate ho aur 'Gusse' mein kaisa.",
+                    "Group Point: Us insaan ki taraf point karo jiska phone ka cover sabse zyada basic ya boring hai."
+                ]
+            },
+            l2: { 
+                truth: [
+                    "Bina soche batao: Is group mein naye logon ke saamne sabse zyada 'fake' ya meetha kaun banta hai?",
+                    "Agar {PlayerB} aur tumhein ek hi insaan pasand aa jaye, toh pehle silently back-out kaun karega aur kyun?",
+                    "Sach batana, is group mein kabhi kisi ki advice ko intentionally ignore kiya hai kyunki lagta tha isko khud kuch nahi pata?",
+                    "Group Point: 1, 2, 3 pe us insaan ki taraf point karo jiska social media unki real life se sabse zyada alag (fake) hai.",
+                    "Kabhi kisi aise insaan pe crush aaya hai jo totally out of your league tha? Wo kis department ka tha?",
+                    "Is group mein wo kaun hai jo genuinely kisi baat pe gussa nahi hota, bas natak karta hai?",
+                    "Aakhri baar kab tumne raasta badla taaki kisi specific insaan se baat na karni pade?",
+                    "Kya tumne kabhi kisi se purposely distance banayi hai kyunki unki vibe ya actions toxic lagne lage the?",
+                    "Look at {PlayerC}. Unki outfit ya style mein ek aisa subtle change batao jo unhe instantly zyada sharp ya attractive bana dega.",
+                    "Tumhare hisaab se is group mein sabse zyada easily manipulate kaun ho sakta hai?",
+                    "Kya tumne kabhi {PlayerB} ke baare mein koi rumor suni hai jo unhe nahi pata? (Sirf Yes/No mein jawab do).",
+                    "Is circle mein kiska humor sabse zyada forced lagta hai kabhi kabhi?",
+                    "Agar is circle mein kisi ek ki life pe reality show bane, toh sabse boring kiska hoga?",
+                    "Is room mein kiska aesthetic ya fashion sense actually sabse mehenga lagta hai aur kiska sabse sasta?",
+                    "Group Point: Point at the person who is most likely to secretly judge everyone else's life choices.",
+                    "Kya tumne kabhi kisi dost ke peeche uski burai ki hai kisi teesre insaan se? (Koi justification nahi, sirf haan ya na).",
+                    "Is group mein sabse zyada attention-seeker kaun hai jise hamesha spotlight chahiye hoti hai?",
+                    "Tumne aakhri baar kab intentionally kisi conversation mein jhoot bola tha taaki tum cool lag sako?",
+                    "Kya tumhe kabhi feel hua hai ki {PlayerB} aur {PlayerC} ke beech mein secretly koi hidden tension ya vibe hai?",
+                    "Agar tumhe ek raat ke liye {PlayerB} ka phone mil jaye, toh tum sabse pehle kaunsi app check karoge?",
+                    "Kya tumne kabhi kisi ke relationship status ko dekh kar secretly khushi manayi hai ki unka break up ho gaya?",
+                    "Group Point: Is group mein sabse jaldi trust issue kiske saath ho sakta hai?",
+                    "Sach batao, kya tum kabhi is group ke kisi member ki Insta story dekhte ho sirf ye judge karne ke liye ki wo kahan ghoom rahe hain?",
+                    "Tumhare hisaab se is room mein sabse zyada 'mood swings' kiske aate hain jiski wajah se baakiyon ko careful rehna padta hai?",
+                    "Agar tumhe pata chale ki {PlayerC} tumhare baare mein peeth peeche mazak udata hai, toh tumhara first reaction kya hoga?"
+                ],
+                dare: [
+                    "Apna phone unlock karo aur {PlayerB} ko apni Insta/Snapchat ki search history slowly padhne do.",
+                    "CURSE TRIGGER: Agle 3 rounds tak, tumhe har baat shuru karne se pehle '{PlayerB} ki kasam' dhire se bolna hoga. Bhule toh penalty.",
+                    "{PlayerC} ko apna phone do. Wo tumhari WhatsApp chat list mein aakhri message kisne bheja hai, wo loud padhenge.",
+                    "Apne Instagram DMs kholo. Sabse top pe jo insaan hai (non-family), usko ek random emoji bhej do bina kisi context ke.",
+                    "Maintain unbreakable eye contact with {PlayerB} for exactly 30 seconds. Jo pehle hasa, wo loser hoga aur penalty bharega.",
+                    "Tumhe 1 minute milta hai room ke bahar jaane ke liye aur waapas aakar apni outfit ka ek element completely badal ke aane ke liye.",
+                    "Agle 5 minute ke liye, {PlayerB} tumhara 'boss' hai. Wo jo bhi simple aur safe command denge, tumhe manna padega.",
+                    "Apni gallery ki 'Recently Deleted' ya 'Hidden' folder ko {PlayerC} ke saamne exactly 5 seconds ke liye open karo.",
+                    "Tumhari contact list mein 15th number pe jo hai, usko text karo: 'I know what you did last night.'",
+                    "Is group mein jiska dressing sense sabse better hai, uske paas jao aur exactly batao ki unka style kya convey karta hai.",
+                    "Apne phone ka camera kholo aur {PlayerB} ka ek random, unfiltered candid photo click karo aur bina dekhe unko bhejo.",
+                    "Group Point: Sab ek dusre ka phone exchange karo. 30 seconds tak ek dusre ka phone check karo. Jisne bhi object kiya wo ek sach bolega.",
+                    "Agle round tak tumhe apni aakhein band rakhni hain jab tak ki koi tumhara naam na pukare.",
+                    "Apni call log kholo aur last dialed number loud batao (family member chhod kar).",
+                    "{PlayerC} ko ek compliment do, par usme ek slight insult bhi honi chahiye (Backhanded compliment).",
+                    "Tumhe {PlayerB} ki ek aadat ki acting karni hai bina unka naam liye, baaki log guess karenge.",
+                    "Apne phone se apna sabse bekaar photo dhundh kar group chat mein daalo.",
+                    "Agle 3 minute ke liye tumhe bilkul freeze hoke (statue) rehna hai. Koi expression nahi badalna.",
+                    "Apne WhatsApp status pe ek cryptic sad emoji dalo bina koi explanation diye, aur 10 min baad delete karo.",
+                    "Tumhe exactly 1 min milta hai apna social media profile check karne ka aur ek purani post delete karne ka jise tumhe dekh ke ab cringe feel hota hai.",
+                    "Group Point: 1, 2, 3 pe point karo us insaan ki taraf jo is group mein sabse zyada drama create kar sakta hai.",
+                    "Apni aakhri 5 swiggy ya zomato orders dikhao taaki sabko tumhara late-night craving pattern pata chale.",
+                    "Agle round tak tumhe kisi ki bhi baat ka jawab sirf ek 'Hmmm' ya nod karke dena hai.",
+                    "{PlayerB} se ek bohot personal sawaal pucho jo tum hamesha se puchna chahte the par himmat nahi hui.",
+                    "Tumhe {PlayerC} ka haath thame rakhna hai agle 2 minute tak, chahe situation kitni bhi awkward kyun na ho."
+                ]
+            },
+            l3: { 
+                truth: [
+                    "Gun to your head: Kya tumne kabhi is group ke kisi member ke ex ya current partner ko seriously attractive maana hai?",
+                    "Kya tumhe kabhi feel hua hai ki tum is circle mein 'backup friend' ho? Kis specific situation mein aisa laga tha?",
+                    "{PlayerB} ki aankhon mein dekho. Tumhe kya lagta hai, inki life ki sabse badi insecurity kya hai jo ye kisiko nahi batate?",
+                    "Kya tumne kabhi {PlayerC} ki kisi success ya achievement pe silently thodi si jealousy feel ki hai, even if tumne unhe bahar se congratulate kiya ho?",
+                    "Apne aapse poocho: Kya tum is friend group mein genuinely wahi insaan ho jo tum akele mein hote ho, ya ek 'mask' pehna hua hai fit in karne ke liye?",
+                    "Tumhari apni sabse badi social fear kya hai? Wo kaunsi cheez hai jise chhupane ke liye tum sabse zyada energy lagate ho?",
+                    "Agar {PlayerB} kal subah tumhe bina bataye completely ignore karne lage, toh tumhara pehla thought kya hoga ki tumne aisi kya galti ki?",
+                    "Is room mein wo kaunsa insaan hai jiske intentions pe tumhe past mein sabse zyada doubt hua tha, par tumne ignore kiya?",
+                    "Agar {PlayerB} aur {PlayerC} ka ganda jhagda ho jaye, toh honestly tum kiski side loge aur actually kyun?",
+                    "Is circle mein sabse zyada 'conditional' dosti kiski lagti hai? (Jo sirf matlab hone pe baat karta hai ya apna mood theek hone pe).",
+                    "Look at {PlayerB}. Unki ek aisi aadat batao jo tumhe secretly bohot annoying lagti hai par tumne kabhi face pe bola nahi.",
+                    "Tumhara ek secret ambition kya hai jiske baare mein tum kisi ko nahi batate kyunki tumhe darr hai log mazaak udayenge?",
+                    "Kya tumne kabhi is game mein pehle koi bada jhoot bola hai taaki awkwardness ya humiliation se bach sako?",
+                    "Group Point: 1, 2, 3 pe point at the person who is hiding the most emotional baggage right now.",
+                    "Tumne past mein aisi kaunsi galti ki hai, jo tumhe lagta hai {PlayerC} abhi present mein kar raha hai par use realize nahi ho raha?",
+                    "Kya tumne kabhi kisi aise insaan ke saath flirt kiya hai jiske baare mein tumhe pata tha ki wo available nahi hai?",
+                    "Sach batao, kya tumne kabhi apne dosto ki advice maan kar apna koi decision badla hai aur baad mein bohot regret kiya ho?",
+                    "Agar tumhari life ki ek movie bane, toh uska sabse embarrassing scene kaunsa hoga jo tum chahoge ki delete ho jaye?",
+                    "Kya tum kabhi akele hote ho toh is group ke members ki life ko aapas mein compare karke khud ko judge karte ho?",
+                    "Is group mein kis member ke paas tumhari ek aisi information hai jo agar baakiyon ko pata chale toh image kharab ho sakti hai?",
+                    "Agar tumhe ek power mile ki tum kisi ek insaan ka dimaag padh sako (is room mein), toh kiska dimaag padhna chahoge aur kyun?",
+                    "Kya tumne kabhi kisi ki success pe isliye khushi manayi hai kyunki uske fail hone par tumhe bura lagta, na ki isliye ki tum genuinely khush the?",
+                    "Tumhari life ka wo kaunsa moment tha jab tumhe sach mein laga ki tum bilkul akele pad gaye ho, chahe kitne bhi dost paas hon?",
+                    "Group Point: Us insaan ki taraf point karo jiska dil is room mein sabse zyada baar toota hoga.",
+                    "Agar tumhe is group se koi ek insaan nikalna ho taaki group ka 'drama' kam ho jaye, toh bina soche kiska naam loge?"
+                ],
+                dare: [
+                    "{PlayerC} ko apna phone do. Wo aankh band karke tumhari gallery scroll karenge (max 5 seconds). Jo photo aayi, wo explain karni hogi.",
+                    "{PlayerB} ko dekh kar unki ek sabse badi kami (flaw) batao, aur fir ek sabse acchi baat batao. Brutally honest hona hai.",
+                    "Tumhare paas 2 options hain: Ya toh {PlayerB} ko 30 seconds tumhara phone check karne do, YA apni sabse badi insecurity abhi batao.",
+                    "{PlayerB} ke paas jao aur unke kaan mein is group ke kisi aur member ke baare mein ek genuine, unsaid observation whisper karo.",
+                    "Apne phone se {PlayerB} ko ek genuine apology likho kisi past behavior ke liye aur send karo. Face-to-face baat nahi karni.",
+                    "CURSE TRIGGER: Agle 4 rounds tak, tumhara ek haath {PlayerB} ke shoulder ya haath se touch rehna chahiye. Agar connection toota, penalty.",
+                    "Apne WhatsApp pe jao, aur search bar mein wo word dalo jo {PlayerC} bolega (jaise 'miss', 'hate', 'love'). Jo pehla message aaye wo loud padho.",
+                    "Give your unlocked phone to {PlayerC} and close your eyes for exactly 45 seconds while they do whatever they want.",
+                    "Har player ko ek single word mein describe karo jo unki sabse dark ya hidden personality trait ko darshata ho.",
+                    "Apne Instagram DMs kholo aur {PlayerC} ko apni aakhri 3 recent chats padhne do.",
+                    "Tumhari search history mein aakhri 5 items loud read karo, no matter how embarrassing.",
+                    "{PlayerB} ko 10 seconds tak directly aankhon mein dekho, uske baad unko apni life ka ek saccha regret batao.",
+                    "Group Point: Apna phone apne right wale player ko do aur unhe tumhari kisi bhi ek app mein 1 minute bitane do.",
+                    "Tumhe apne phone mein kisi aise contact ko dhundna hai jisse tumne saalon se baat na ki ho, aur unhe 'Hi, long time' text karna hai.",
+                    "Apne baare mein 3 statements do, jisme se 2 sach aur 1 jhoot ho. Group ko jhoot pehchanna hai.",
+                    "{PlayerC} ke baare mein ek aisi baat batao jo tumhe lagta hai wo khud apne baare mein notice nahi karte.",
+                    "Tumhe ek aisi photo dikhani hai jisme tum ro rahe the ya upset the, aur uske peeche ki vajah batani hai.",
+                    "Agle round tak tumhe apni saari baatein ek emotion ke saath bolni hain, jo emotion {PlayerB} chune (e.g., gussa, sadness, overly excited).",
+                    "Apne phone ki photo album se koi ek aisi photo select karo aur permanently delete karo jo tumhe kisi ki yaad dilati ho.",
+                    "Tumhe ek aise topic par 1 minute tak bina ruke bolna hai jisme tumhe lagta hai ki tum galat ho par tum kabhi admit nahi karte.",
+                    "Apne sabse bade fear ko ek paper pe likho (ya phone pe type karo) aur {PlayerB} ko padhne do silently.",
+                    "Agle 5 minutes tak tumhe har sawal ka jawaab bilkul brutal honesty se dena hai, bina kisi sugarcoating ke.",
+                    "{PlayerC} ko ek minute tak allow karo tumhari profile picture ya bio analyze karke uski 'vibe' par comment karne.",
+                    "Group Point: Sab log apna screen time check karo. Jiska sabse zyada hai, wo ek aisi baat confess karega jo wo kabhi kisi ko batana nahi chahta tha.",
+                    "Tumhe is group ke kisi member se judi ek aisi memory share karni hai jisme tumhe unki wajah se bohot embarrassment hui thi."
+                ]
+            },
+            l4: { 
+                truth: [
+                    "Agar aaj campus mein tumhara aakhri din hota, toh wo kaunsa ek bada jhoot hai jo tum confess karke jaate jo tumne is group se bola hai?",
+                    "Graduation ke baad, is group mein sabse pehle baakiyon se contact tod kar kaun hamesha ke liye aage badh jayega?",
+                    "Look at {PlayerC}. Kya tumhe kabhi inki dosti ya inke intentions pe 1% bhi doubt hua hai?",
+                    "Is circle mein ek aisi kya baat hai jo sabko pata hai par koi bolta nahi hai? (The elephant in the room).",
+                    "Agar tumhe pata chale ki {PlayerB} ne tumhare baare mein peeth peeche ek bohot buri rumor failayi hai, toh tumhara exact reaction kya hoga?",
+                    "Sach batana, is circle mein sabse zyada toxic trait actually kiska hai aur wo kaise manifest hota hai?",
+                    "Tumhare hisaab se, 5 saal baad is group mein se kaun sabse zyada successful hoga, aur kaun apni potential waste kar dega?",
+                    "Kya tum genuinely khush ho ki tum abhi life mein kahan ho, ya tum bas logo ko dikhane ke liye ek strong act put up kar rahe ho?",
+                    "Agar tumhe {PlayerB} ka ek deep dark secret pata chal jaye jo unki image destroy kar de, toh kya tum use kabhi use karoge?",
+                    "Is circle mein jisko tumne sabse zyada silently judge kiya hai past mein, usne aisi kaunsi cheez ki thi jo tumhe totally galat lagi thi?",
+                    "Tumne aaj tak apni family se kaunsa ek aisa truth chupaya hai jo agar bahar aa gaya toh sab kuch badal jayega?",
+                    "Kya tumne kabhi kisi apne ko intentionally hurt kiya hai sirf isliye kyunki tum us time mentally unstable ya gusse mein the?",
+                    "Is group mein kis member ke absence mein group ki vibe totally different (ya better) ho jati hai?",
+                    "Tumhari life mein ek aisa kaunsa decision tha jiska regret tumhe abhi tak andhi raat mein sone nahi deta?",
+                    "Agar tumhari life 10 second pehle rewind ki ja sake kisi ek moment ko badalne ke liye, toh tum wo kaunsa moment chunoge?",
+                    "Tumhara actually sabse bada trauma kya hai jise tum 'dark humor' ka cover pehan kar chupa lete ho?",
+                    "Group Point: Us insaan ki taraf point karo jise tumhe lagta hai mental therapy ya counseler ki sabse zyada zaroorat hai right now.",
+                    "Kya tumne kabhi is group ke kisi insaan ke struggle ya dard ko 'unimportant' samajh kar dismiss kiya hai?",
+                    "Sach batao, kya tumne kabhi financially ya emotionally struggle karte waqt kisi dost ka fayda uthaya hai bina use pata lage?",
+                    "Agar tum kal subah utho aur tumhe pata chale ki tumhare paas sirf 24 ghante bache hain, toh kisse maafi mangoge?",
+                    "Is group mein kis insaan ki life choices tumhe secretly bohot problematic lagti hain, par tumne kabhi mu par nahi bola?",
+                    "Tumne past mein kis ek insaan ka trust sabse buri tarah toda hai, aur kya tumne kabhi uske liye sincerely maafi mangi hai?",
+                    "Kya tumhe sach mein lagta hai ki tum ek 'achhe insaan' ho, ya tumhe pata hai ki tum selfish ho par tum justify kar lete ho?",
+                    "Group Point: Kisko lagta hai ki 10 saal baad is room ke aade log ek dusre ka chehra bhi dekhna pasand nahi karenge?",
+                    "Tumhara wo ek deep, dark thought kya hai jo kabhi kabhi tumhare dimaag mein aata hai jisse tumhe khud se dar lagne lagta hai?"
+                ],
+                dare: [
+                    "You have 60 seconds. Apne phone pe kisi aise insaan ka number permanently delete karo jise tumhe apni life se hamesha ke liye nikal dena chahiye. Group ko naam batao.",
+                    "{PlayerB} tumhare phone se kisi ko bhi ek single text message bhej sakta hai (No gaali-galoch allowed, but context can be incredibly awkward).",
+                    "Is group mein jisko tumne past mein sabse zyada silently judge kiya hai, uske saamne confess karo ki tumne actually kya socha tha unke baare mein us waqt.",
+                    "Call the 3rd person in your recent call logs and tell them 'Mujhe tumse ek zaroori baat karni thi, par ab himmat nahi ho rahi.' and hang up immediately.",
+                    "Let {PlayerC} go through your WhatsApp for exactly 45 seconds. They can read any one specific message out loud.",
+                    "Look everyone in the eye, one by one, aur unhe unke baare mein ek aisi harsh truth batao jo unhe accept karni chahiye.",
+                    "Apne kisi ek ex ya ex-crush ko text karo: 'I still think about that day.' Aur agle 1 ghante tak koi explanation nahi dena.",
+                    "Give your phone to {PlayerB}. They get to search one specific word (e.g. 'cheat', 'liar', 'sorry') in your WhatsApp search bar and read the context of the first result.",
+                    "Apne phone se {PlayerC} ko ek message bhej kar confess karo ek aisi serious cheez jo tumne ab tak unse chupayi ho.",
+                    "Tumhe exactly 1 minute milta hai apne phone pe kuch bhi permanently delete karne ke liye (pics, chats). Uske baad phone {PlayerB} ke haath mein jayega 30 seconds ke liye.",
+                    "Apne bank account / UPI balance ka screenshot lo aur dosto ko dikhao, no matter kitna kam ya zyada ho.",
+                    "Agle round tak tumhe apni aakhein band karni hain aur jab tak game chal raha hai, silently apne past actions pe reflect karna hai.",
+                    "Group Point: Apna phone apne left wale player ko do. Wo tumhare notes app mein jayega aur ek random note loud padh kar sunayega.",
+                    "{PlayerC} ke paas jao, unhe exactly 15 seconds tak zor se hug karo, aur kaho 'Mujhe lagta hai tum tut rahe ho aur tum thik nahi ho'.",
+                    "Apne phone ke aakhri 5 screenshots dikhao bina kisi explanation ke. Agar unme kuch sensitive hai, toh penalty bhugatna padega.",
+                    "Apni life ki sabse dark memory ko exactly 2 sentences mein summarize karke batao.",
+                    "Tumhe kisi bhi relative ko text karna hai: 'I have messed up big time, need to talk.' aur unka reaction aane tak silent rehna hai.",
+                    "{PlayerB} ko permission hai ki wo tumhari kisi social media account se ek cryptic aur sad status daale jo agle 2 ghante tak nahi hatega.",
+                    "Group Point: 1, 2, 3 pe point karo us insaan ki taraf jispe tum least depend karoge agar tum kisi life-or-death crisis mein phas jao.",
+                    "Apne phone ke camera se apni ek ro ti hui ya thaki hui shakal ki selfie lo, aur usay group chat mein permanently bhej do.",
+                    "Tumhe ek truth bolna hai jisme tum accept karoge ki tumne kisi dusre insaan ko consciously hurt kiya taaki tumhari apni ego boost ho.",
+                    "Apni search history kholo aur aakhri query ka deep psychological meaning derive karke batao.",
+                    "{PlayerC} ko ek minute tak allow karo tumhari aakhri 10 gallery photos dekhne, aur unme se ek ko unhe directly delete karne ka right hai.",
+                    "Tumhe apne dimaag mein jo sabse pehla negative thought aa raha hai, usko uncensored aur bina kisi filter ke bolna hai.",
+                    "Agle 5 minutes ke liye game ki moderation {PlayerB} ko do, aur wo jo bhi deep sawaal pooche, tumhe explicitly 'haan' ya 'na' mein answer dena hai."
+                ]
+            }
+        };
+
+        const parsePrompt = (template, current) => {
+            let targets = state.players.filter(p => p !== current).sort(() => 0.5 - Math.random());
+            const pB = targets[0] || "kisi aur"; 
+            const pC = targets[1] || (targets[0] ? targets[0] : "kisi aur"); 
+            return template.replace(/{PlayerB}/g, `<span class="highlight-secondary">${pB}</span>`).replace(/{PlayerC}/g, `<span class="highlight-secondary">${pC}</span>`);
+        };
+
+        /** ==========================================
+         * 6. DOM & STATE MANAGEMENT
+         * ========================================== */
+        const UI = {
+            setupScreen: document.getElementById('setup-screen'), gameScreen: document.getElementById('game-screen'),
+            playerInput: document.getElementById('player-input'), addBtn: document.getElementById('add-player-btn'), 
+            playerList: document.getElementById('player-list'), startBtn: document.getElementById('start-game-btn'), 
+            arena: document.getElementById('arena'), bottleEl: document.getElementById('bottle'), 
+            modal: document.getElementById('modal'), modalContent: document.getElementById('modal-content'),
+            modalHeader: document.getElementById('modal-header'), modalTitle: document.getElementById('modal-title'), 
+            modalTask: document.getElementById('modal-task-text'), modalBtns: document.getElementById('modal-buttons'), 
+            levelDisplay: document.getElementById('level-display'), curseBanner: document.getElementById('curse-banner'),
+            modeBtns: document.querySelectorAll('.mode-btn'), backToLobbyBtn: document.getElementById('back-to-lobby-btn')
+        };
+
+        let state = { players: [], nodes: [], current: null, turns: 0, mode: 'ai', spinning: false, curseCount: 0 };
+
+        UI.modeBtns.forEach(btn => {
+            btn.onclick = (e) => {
+                UI.modeBtns.forEach(b => b.classList.remove('active')); e.target.classList.add('active');
+                state.mode = e.target.dataset.mode;
+            };
+        });
+
+        const updateRoster = () => {
+            UI.playerList.innerHTML = '';
+            state.players.forEach(p => {
+                const tag = document.createElement('div'); tag.className = 'player-tag'; tag.textContent = p;
+                tag.onclick = () => { state.players = state.players.filter(n => n !== p); updateRoster(); };
+                UI.playerList.appendChild(tag);
+            });
+            UI.startBtn.disabled = state.players.length < 2; 
+        };
+
+        UI.addBtn.onclick = () => { const name = UI.playerInput.value.trim(); if (name && !state.players.includes(name)) { state.players.push(name); UI.playerInput.value = ''; updateRoster(); } };
+        UI.playerInput.onkeypress = (e) => { if (e.key === 'Enter') UI.addBtn.onclick(); };
+
+        UI.startBtn.onclick = () => {
+            UI.setupScreen.classList.add('hidden'); UI.gameScreen.classList.remove('hidden');
+            CognitiveEngine.init(); 
+            
+            // FULL PLAYER ARRAY LOGGED FOR GOD-MODE ANALYTICS
+            logEvent('protocol_engaged', { subjects: state.players, mode: state.mode });
+            
+            initArena();
+        };
+
+        UI.backToLobbyBtn.onclick = () => {
+            UI.gameScreen.classList.add('hidden'); 
+            UI.setupScreen.classList.remove('hidden');
+        };
+
+        /** ==========================================
+         * 7. HARDWARE-ACCELERATED PHYSICS
+         * ========================================== */
+        const initArena = () => {
+            UI.arena.innerHTML = ''; UI.arena.appendChild(UI.bottleEl); state.nodes = [];
+            const r = UI.arena.offsetWidth / 2 * 0.82; const aInc = 360 / state.players.length;
+            state.players.forEach((p, i) => {
+                const rad = ((i * aInc) - 90) * (Math.PI / 180);
+                const x = (UI.arena.offsetWidth / 2) + r * Math.cos(rad); const y = (UI.arena.offsetHeight / 2) + r * Math.sin(rad);
+                const n = document.createElement('div'); n.className = 'player-node'; n.textContent = p;
+                n.style.left = `${x}px`; n.style.top = `${y}px`; UI.arena.appendChild(n); state.nodes.push(n);
+            });
+        };
+
+        class PhysicsBottle {
+            constructor(el) { this.el = el; this.a = 0; this.v = 0; this.f = 0.992; }
+            spin(vel) { if(state.spinning) return; state.spinning = true; this.v = vel; this.update(); }
+            update() {
+                if (Math.abs(this.v) > 0.1) {
+                    this.a += this.v; this.v *= this.f; 
+                    this.el.style.transform = `translate(-50%, -50%) rotate(${this.a}deg)`;
+                    if (Math.random() > 0.8 && navigator.vibrate) navigator.vibrate(10); 
+                    this.glow(); requestAnimationFrame(() => this.update());
+                } else { this.stop(); }
+            }
+            glow() {
+                const slice = 360 / state.players.length; const norm = ((this.a % 360) + 360) % 360;
+                const idx = Math.floor((norm + (slice/2)) % 360 / slice);
+                state.nodes.forEach((n, i) => n.classList.toggle('glowing', i === idx));
+            }
+            stop() { this.v = 0; state.spinning = false; state.nodes.forEach(n => n.classList.remove('glowing')); executeTurnLogic(); }
+        }
+        const bottle = new PhysicsBottle(UI.bottleEl);
+
+        let drag = { s:0, on:false, l:0, t:0 };
+        const dStart = (e) => { if (state.spinning) return; drag.on = true; const r = UI.bottleEl.getBoundingClientRect(); const cx = r.left + r.width/2, cy = r.top + r.height/2; const ex = e.touches ? e.touches[0].clientX : e.clientX, ey = e.touches ? e.touches[0].clientY : e.clientY; drag.s = Math.atan2(ey - cy, ex - cx) * (180/Math.PI); drag.l = bottle.a; drag.t = Date.now(); };
+        const dMove = (e) => { 
+            if (!drag.on) return; e.preventDefault(); const r = UI.bottleEl.getBoundingClientRect(); const cx = r.left + r.width/2, cy = r.top + r.height/2; const ex = e.touches ? e.touches[0].clientX : e.clientX, ey = e.touches ? e.touches[0].clientY : e.clientY; 
+            bottle.a = drag.l + (Math.atan2(ey - cy, ex - cx) * (180/Math.PI) - drag.s); 
+            bottle.el.style.transform = `translate(-50%, -50%) rotate(${bottle.a}deg)`; bottle.glow(); 
+        };
+        const dEnd = () => { if (!drag.on) return; drag.on = false; let v = (bottle.a - drag.l) / (Date.now() - drag.t || 1) * 20 + ((Math.random()>0.5?10:-10) + Math.random()*20); if(Math.abs(v) < 15) v = 25; bottle.spin(v); };
+        
+        UI.bottleEl.addEventListener('mousedown', dStart); document.addEventListener('mousemove', dMove); document.addEventListener('mouseup', dEnd);
+        UI.bottleEl.addEventListener('touchstart', dStart, {passive:false}); document.addEventListener('touchmove', dMove, {passive:false}); document.addEventListener('touchend', dEnd);
+
+        /** ==========================================
+         * 8. TENSION MODAL FLOW & GOD-MODE TELEMETRY
+         * ========================================== */
+        const getPhase = (t) => { if (t <= 8) return (t % 2 === 0) ? 'l1' : 'l2'; if (t > 8 && t <= 20) return (t % 3 === 0) ? 'l3' : (t % 5 === 0 ? 'l4' : 'l2'); const w = t % 10; return (w <= 3) ? 'l2' : ((w <= 7) ? 'l3' : 'l4'); };
+
+        const executeTurnLogic = () => {
+            state.turns++;
+            const slice = 360 / state.players.length; const idx = Math.floor((((bottle.a % 360) + 360) % 360 + (slice/2)) % 360 / slice);
+            state.current = state.players[idx]; state.nodes[idx].classList.add('selected');
+            
+            if(state.curseCount > 0) { state.curseCount--; if(state.curseCount === 0) UI.curseBanner.style.display = 'none'; }
+
+            if (state.mode === 'classic') {
+                showModal("CLASSIC MODE", `<span class="highlight-target">${state.current}</span>`, "Group, ask them a Truth or Dare.", `<button class="btn btn-modal btn-truth full" onclick="closeModal()">Next Turn</button>`);
+                if (navigator.vibrate) navigator.vibrate([150]);
+            } else {
+                let phase = getPhase(state.turns); let text = "LEVEL 1: ICEBREAKER"; document.body.className = '';
+                if(phase === 'l2') { document.body.classList.add('phase-2'); text = "LEVEL 2: GOSSIP"; }
+                if(phase === 'l3') { document.body.classList.add('phase-3'); text = "LEVEL 3: THE EDGE"; }
+                if(phase === 'l4') { document.body.classList.add('phase-4'); text = "LEVEL 4: NUCLEAR"; }
+                UI.levelDisplay.textContent = text;
+
+                showModal("TARGET LOCKED", `<span class="highlight-target">${state.current}</span>`, "Make your choice.", `<button class="btn btn-modal btn-truth" onclick="generatePrompt('truth')">Truth</button><button class="btn btn-modal btn-dare" onclick="generatePrompt('dare')">Dare</button>`);
+                if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+            }
+        };
+
+        const showModal = (h, t, task, btns) => { UI.modalHeader.innerHTML = h; UI.modalTitle.innerHTML = t; UI.modalTask.innerHTML = task; UI.modalBtns.innerHTML = btns; UI.modal.classList.add('visible'); };
+        const closeModal = () => { UI.modal.classList.remove('visible'); state.nodes.forEach(n => n.classList.remove('selected')); };
+
+        // GOD-MODE LOGGING: Record when a task is marked as completed
+        const completeTask = () => {
+            logEvent('task_completed', { player: state.current });
+            closeModal();
+        };
+
+        const generatePrompt = (type) => {
+            UI.modalContent.classList.add('tension-state');
+            showModal("ANALYZING...", `<span class="highlight-target">${state.current}</span>`, `<span class="loading-text">Generating challenge...</span>`, "");
+            if (navigator.vibrate) navigator.vibrate([100, 50, 100, 500, 100, 50, 100]);
+
+            setTimeout(() => {
+                UI.modalContent.classList.remove('tension-state');
+                let phase = getPhase(state.turns); 
+                let arr = DB[phase][type];
+                
+                let freshIdx = CognitiveEngine.getIndex(state.current, phase, type, arr.length);
+                let raw = arr[freshIdx];
+                CognitiveEngine.logPrompt(state.current, phase, type, freshIdx);
+                
+                if(raw.includes("CURSE TRIGGER") || raw.includes("Group Point:")) { 
+                    state.curseCount = type === 'truth' ? 3 : 5; 
+                    UI.curseBanner.style.display = 'inline-block'; 
+                    UI.curseBanner.textContent = raw.includes("Group Point:") ? `Group Action` : `Active Curse on ${state.current}`; 
+                }
+                
+                let prompt = parsePrompt(raw, state.current);
+                if (navigator.vibrate) navigator.vibrate([200, 100, 300]);
+
+                // GOD-MODE LOGGING: Record exactly who got what question
+                logEvent('question_asked', { 
+                    target_player: state.current, 
+                    question_type: type, 
+                    level: phase, 
+                    prompt_text: prompt.replace(/<[^>]*>?/gm, '') 
+                });
+                
+                let btns = `
+                    <button class="btn btn-modal btn-chicken" onclick="triggerPenalty()">Chicken Out</button>
+                    <button class="btn btn-modal btn-dare" onclick="completeTask()">I Did It</button>
+                    <button class="btn btn-modal btn-share" onclick="executeNativeShare('${prompt.replace(/<[^>]*>?/gm, '')}', '${state.current}')">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 5px;"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>
+                        Share
+                    </button>
+                `;
+                showModal(`${type.toUpperCase()}`, `<span class="highlight-target">${state.current}</span>`, prompt, btns);
+            }, 2500);
+        };
+
+        const triggerPenalty = () => {
+            // GOD-MODE LOGGING: Record who chickened out
+            logEvent('chicken_out', { coward: state.current });
+
+            let t = state.players.filter(p => p !== state.current).sort(() => 0.5 - Math.random());
+            let p = [`Penalty: Hand your unlocked phone to <span class="highlight-secondary">${t[0] || "someone"}</span> for 60 seconds.`, `Penalty: Update your WhatsApp status to "I am the biggest coward in this group" for 2 hours.`];
+            showModal(`<span style="color:#ff3b3b">CHICKEN!</span>`, `PENALTY`, p[Math.floor(Math.random()*p.length)], `<button class="btn btn-modal btn-chicken full" onclick="closeModal()">Accept Fate</button>`);
+            UI.modalBtns.classList.add('full'); setTimeout(()=>UI.modalBtns.classList.remove('full'), 500);
+        };
+    </script>
+</body>
+</html>
