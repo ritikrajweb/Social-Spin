@@ -1,21 +1,21 @@
 {
   "name": "Social Spin",
   "short_name": "Social Spin",
-  "start_url": ".",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#090a0f",
   "theme_color": "#090a0f",
   "icons": [
     {
-      "src": "icon.jpg",
+      "src": "icon.png",
       "sizes": "192x192",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "icon.jpg",
+      "src": "icon.png",
       "sizes": "512x512",
-      "type": "image/jpeg",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ]
