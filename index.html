@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Social Spin</title>
+    <title>Social Spin | The Ultimate Truth & Dare Engine</title>
     
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#090a0f">
     
-    <link rel="manifest" href='data:application/manifest+json,{"name":"Social Spin","short_name":"Social Spin","display":"standalone","background_color":"#090a0f","theme_color":"#090a0f","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiMwOTBhMGYiLz48dGV4dCB4PSI1MCIgeT0iNTUiIGZvbnQtc2l6ZT0iNDAiIGZpbGw9IiMwMGQ0ZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXdlaWdodD0iYm9sZCI+U1M8L3RleHQ+PC9zdmc+","sizes":"192x192","type":"image/svg+xml"}]}'>
+    <link rel="manifest" href='data:application/manifest+json,{"name":"Social Spin","short_name":"Social Spin","start_url":".","display":"standalone","background_color":"#090a0f","theme_color":"#090a0f","icons":[{"src":"data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxOTIiIGhlaWdodD0iMTkyIiB2aWV3Qm94PSIwIDAgMTAwIDEwMCI+PHJlY3Qgd2lkdGg9IjEwMCIgaGVpZ2h0PSIxMDAiIGZpbGw9IiMwOTBhMGYiLz48dGV4dCB4PSI1MCIgeT0iNTUiIGZvbnQtc2l6ZT0iNDAiIGZpbGw9IiMwMGQ0ZmYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJzYW5zLXNlcmlmIiBmb250LXdlaWdodD0iYm9sZCI+U1M8L3RleHQ+PC9zdmc+","sizes":"192x192","type":"image/svg+xml"}]}'>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,7 +19,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/UAParser.js/1.0.35/ua-parser.min.js"></script>
 
     <style>
-        /* --- 1. MODERN DARK MATERIAL DESIGN --- */
+        /* ==========================================
+           1. CORE VARIABLES & THEMING
+        ========================================== */
         :root {
             --bg-base: #090a0f;
             --surface-card: #13151f;
@@ -31,107 +33,353 @@
             --accent-primary: #00d4ff; 
         }
 
+        /* Phase-based color shifts for psychological tension */
         body.phase-2 { --accent-primary: #9d4edd; } 
         body.phase-3 { --accent-primary: #ff2a5f; } 
         body.phase-4 { --accent-primary: #ff3b3b; } 
 
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Rajdhani', sans-serif; -webkit-tap-highlight-color: transparent; }
+        * { 
+            margin: 0; 
+            padding: 0; 
+            box-sizing: border-box; 
+            font-family: 'Rajdhani', sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
+        }
 
         html, body {
-            width: 100%; height: 100%; overflow: hidden; background-color: var(--bg-base); color: var(--text-main);
+            width: 100%; 
+            height: 100%; 
+            overflow: hidden; 
+            background-color: var(--bg-base); 
+            color: var(--text-main);
             background-image: radial-gradient(circle at 50% 0%, #13151f 0%, var(--bg-base) 80%);
             transition: background-color 0.4s ease;
         }
 
+        /* ==========================================
+           2. LAYOUT & SCREENS
+        ========================================== */
         .app-container { 
             width: 100%; 
-            height: 100vh; height: 100dvh; 
-            position: relative; overflow: hidden; 
+            height: 100vh; 
+            height: 100dvh; /* Adapts to mobile browser bars */
+            position: relative; 
+            overflow: hidden; 
         }
         
         .screen { 
-            width: 100%; height: 100%; position: absolute; top: 0; left: 0; 
-            display: flex; flex-direction: column; 
-            overflow-y: auto; overflow-x: hidden;
-            padding: 20px; padding-bottom: 90px; 
+            width: 100%; 
+            height: 100%; 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-y: auto; 
+            overflow-x: hidden;
+            padding: 20px; 
+            padding-bottom: 90px; 
             transition: opacity 0.3s ease, transform 0.3s ease; 
         }
-        .screen.hidden { opacity: 0; pointer-events: none; transform: scale(0.96); }
+        
+        .screen.hidden { 
+            opacity: 0; 
+            pointer-events: none; 
+            transform: scale(0.96); 
+        }
 
         .screen-inner {
-            margin: auto; width: 100%; max-width: 420px;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            margin: auto; 
+            width: 100%; 
+            max-width: 420px;
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center;
             position: relative;
         }
 
-        /* --- 2. LOBBY UI --- */
-        .logo { font-size: clamp(3rem, 10vw, 4rem); font-weight: 800; letter-spacing: 3px; text-transform: uppercase; color: var(--text-main); margin-bottom: 25px; text-align: center; line-height: 1; text-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+        /* ==========================================
+           3. LOBBY UI COMPONENTS
+        ========================================== */
+        .logo { 
+            font-size: clamp(3rem, 10vw, 4rem); 
+            font-weight: 800; 
+            letter-spacing: 3px; 
+            text-transform: uppercase; 
+            color: var(--text-main); 
+            margin-bottom: 25px; 
+            text-align: center; 
+            line-height: 1; 
+            text-shadow: 0 4px 15px rgba(0,0,0,0.8); 
+        }
         
         .material-card {
             background: linear-gradient(145deg, var(--surface-card), #0d0f16);
-            border-top: 1px solid var(--border-highlight); border-left: 1px solid var(--border-highlight);
-            border-right: 1px solid var(--border-shadow); border-bottom: 1px solid var(--border-shadow);
-            border-radius: 20px; padding: 25px 20px; width: 100%;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.6); display: flex; flex-direction: column; gap: 15px;
+            border-top: 1px solid var(--border-highlight); 
+            border-left: 1px solid var(--border-highlight);
+            border-right: 1px solid var(--border-shadow); 
+            border-bottom: 1px solid var(--border-shadow);
+            border-radius: 20px; 
+            padding: 25px 20px; 
+            width: 100%;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6); 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px;
         }
 
-        .mode-selector { display: flex; background: #07080b; border-radius: 12px; padding: 5px; box-shadow: inset 0 2px 6px rgba(0,0,0,0.5); }
-        .mode-btn { flex: 1; padding: 12px; background: transparent; border: none; color: var(--text-muted); border-radius: 8px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; }
-        .mode-btn.active { background: var(--surface-raised); color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        .mode-selector { 
+            display: flex; 
+            background: #07080b; 
+            border-radius: 12px; 
+            padding: 5px; 
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.5); 
+        }
+        
+        .mode-btn { 
+            flex: 1; 
+            padding: 12px; 
+            background: transparent; 
+            border: none; 
+            color: var(--text-muted); 
+            border-radius: 8px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            font-size: 0.95rem; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
+        
+        .mode-btn.active { 
+            background: var(--surface-raised); 
+            color: var(--text-main); 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4); 
+        }
 
-        .input-group { display: flex; gap: 10px; }
+        .input-group { 
+            display: flex; 
+            gap: 10px; 
+        }
+        
         input[type="text"] {
-            flex-grow: 1; padding: 14px 16px; border-radius: 12px; border: 1px solid transparent; 
-            background: #07080b; color: var(--text-main); font-size: 1.1rem; font-weight: 600; 
-            box-shadow: inset 0 2px 6px rgba(0,0,0,0.5); transition: all 0.2s;
+            flex-grow: 1; 
+            padding: 14px 16px; 
+            border-radius: 12px; 
+            border: 1px solid transparent; 
+            background: #07080b; 
+            color: var(--text-main); 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.5); 
+            transition: all 0.2s;
         }
-        input[type="text"]:focus { outline: none; border-color: var(--accent-primary); box-shadow: inset 0 2px 6px rgba(0,0,0,0.5), 0 0 12px rgba(0,212,255,0.1); }
         
-        .btn { padding: 14px; border-radius: 12px; border: none; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: transform 0.1s, box-shadow 0.2s; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-add { background: var(--surface-raised); color: var(--text-main); width: 60px; font-size: 1.5rem; border-top: 1px solid var(--border-highlight); box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-        .btn-add:active { transform: translateY(2px); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
-        
-        .btn-primary { background: linear-gradient(135deg, var(--text-main), #b8bbc6); color: var(--bg-base); width: 100%; box-shadow: 0 6px 15px rgba(255,255,255,0.1); }
-        .btn-primary:active { transform: translateY(2px); box-shadow: 0 2px 8px rgba(255,255,255,0.1); }
-        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; background: var(--surface-raised); color: var(--text-muted); }
-        
-        #player-list { display: flex; flex-wrap: wrap; gap: 8px; min-height: 44px; }
-        .player-tag { background: #07080b; border: 1px solid var(--surface-raised); padding: 8px 14px; border-radius: 8px; font-weight: 600; font-size: 1.05rem; cursor: pointer; color: var(--text-main); box-shadow: 0 2px 5px rgba(0,0,0,0.3);}
-        .player-tag:hover { border-color: #ff2a5f; color: #ff2a5f; text-decoration: line-through; }
-
-        .btn-install {
-            background: linear-gradient(145deg, #1c1f2e, #13151f); border: 1px solid var(--accent-primary); 
-            color: var(--accent-primary); padding: 10px 20px; border-radius: 30px; 
-            font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.2s; 
-            box-shadow: 0 4px 12px rgba(0,212,255,0.2); display: none; 
-            align-items: center; gap: 8px; margin-top: 15px; text-transform: uppercase; letter-spacing: 1px;
+        input[type="text"]:focus { 
+            outline: none; 
+            border-color: var(--accent-primary); 
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.5), 0 0 12px rgba(0,212,255,0.1); 
         }
-        .btn-install:active { transform: scale(0.95); }
+        
+        .btn { 
+            padding: 14px; 
+            border-radius: 12px; 
+            border: none; 
+            font-weight: 800; 
+            font-size: 1.1rem; 
+            cursor: pointer; 
+            transition: transform 0.1s, box-shadow 0.2s; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+        }
+        
+        .btn-add { 
+            background: var(--surface-raised); 
+            color: var(--text-main); 
+            width: 60px; 
+            font-size: 1.5rem; 
+            border-top: 1px solid var(--border-highlight); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3); 
+        }
+        
+        .btn-add:active { 
+            transform: translateY(2px); 
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3); 
+        }
+        
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--text-main), #b8bbc6); 
+            color: var(--bg-base); 
+            width: 100%; 
+            box-shadow: 0 6px 15px rgba(255,255,255,0.1); 
+        }
+        
+        .btn-primary:active { 
+            transform: translateY(2px); 
+            box-shadow: 0 2px 8px rgba(255,255,255,0.1); 
+        }
+        
+        .btn-primary:disabled { 
+            opacity: 0.4; 
+            cursor: not-allowed; 
+            transform: none; 
+            box-shadow: none; 
+            background: var(--surface-raised); 
+            color: var(--text-muted); 
+        }
+        
+        #player-list { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 8px; 
+            min-height: 44px; 
+        }
+        
+        .player-tag { 
+            background: #07080b; 
+            border: 1px solid var(--surface-raised); 
+            padding: 8px 14px; 
+            border-radius: 8px; 
+            font-weight: 600; 
+            font-size: 1.05rem; 
+            cursor: pointer; 
+            color: var(--text-main); 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+        
+        .player-tag:hover { 
+            border-color: #ff2a5f; 
+            color: #ff2a5f; 
+            text-decoration: line-through; 
+        }
 
-        /* --- 3. FLOATING ELEMENTS & WATERMARK --- */
-        .watermark-container { position: fixed; bottom: 25px; left: 20px; z-index: 10; pointer-events: none; transition: opacity 0.3s ease; }
-        .watermark { font-size: 0.8rem; letter-spacing: 3px; color: rgba(255,255,255,0.25); font-weight: 700; text-transform: uppercase; }
+        /* ==========================================
+           4. PWA TOAST & FLOATING ELEMENTS
+        ========================================== */
+        .pwa-toast {
+            position: fixed; 
+            bottom: 30px; 
+            left: 50%; 
+            transform: translateX(-50%) translateY(150%);
+            width: calc(100% - 40px); 
+            max-width: 380px; 
+            background: var(--surface-card);
+            border: 1px solid var(--accent-primary); 
+            border-radius: 16px; 
+            padding: 18px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8); 
+            z-index: 5000;
+            transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex; 
+            align-items: center; 
+            gap: 15px;
+        }
+        
+        .pwa-toast.visible { 
+            transform: translateX(-50%) translateY(0); 
+        }
+
+        .pwa-icon { 
+            width: 45px; 
+            height: 45px; 
+            background: var(--bg-base); 
+            border-radius: 12px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: var(--accent-primary); 
+            font-weight: 800; 
+            border: 1px solid rgba(255,255,255,0.1); 
+        }
+
+        .pwa-text { flex: 1; }
+        .pwa-text h4 { font-size: 1rem; color: var(--text-main); margin-bottom: 2px; }
+        .pwa-text p { font-size: 0.8rem; color: var(--text-muted); }
+
+        .pwa-btn { 
+            background: var(--accent-primary); 
+            color: var(--bg-base); 
+            border: none; 
+            padding: 8px 15px; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            font-size: 0.85rem; 
+            cursor: pointer; 
+            white-space: nowrap; 
+        }
+        
+        .pwa-close { 
+            color: var(--text-muted); 
+            background: none; 
+            border: none; 
+            font-size: 1.2rem; 
+            cursor: pointer; 
+            padding: 0 5px; 
+        }
+
+        .watermark-container {
+            position: fixed; 
+            bottom: 25px; 
+            left: 20px; 
+            z-index: 10;
+            pointer-events: none; 
+            transition: opacity 0.3s ease;
+        }
+        
+        .watermark { 
+            font-size: 0.8rem; 
+            letter-spacing: 3px; 
+            color: rgba(255,255,255,0.25); 
+            font-weight: 700; 
+            text-transform: uppercase; 
+        }
 
         .fab-feedback {
-            position: fixed; bottom: 20px; right: 20px;
-            background: linear-gradient(135deg, #25D366, #128C7E); color: #fff;
-            border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; padding: 12px 18px;
-            display: flex; align-items: center; gap: 8px;
-            font-weight: 700; font-size: 0.95rem; font-family: 'Rajdhani', sans-serif;
-            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4); cursor: pointer;
-            z-index: 999; transition: transform 0.2s, opacity 0.3s ease;
+            position: fixed; 
+            bottom: 20px; 
+            right: 20px;
+            background: linear-gradient(135deg, #25D366, #128C7E); 
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2); 
+            border-radius: 50px; 
+            padding: 12px 18px;
+            display: flex; 
+            align-items: center; 
+            gap: 8px;
+            font-weight: 700; 
+            font-size: 0.95rem; 
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4); 
+            cursor: pointer;
+            z-index: 999; 
+            transition: transform 0.2s, opacity 0.3s ease;
         }
+        
         .fab-feedback:active { transform: scale(0.95); }
 
         .btn-back {
-            position: absolute; top: 0px; left: 0px;
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border-highlight);
-            color: var(--text-main); padding: 8px 16px; border-radius: 20px;
-            display: flex; align-items: center; gap: 6px;
-            font-weight: 700; font-size: 0.9rem; cursor: pointer;
-            z-index: 50; transition: background 0.2s; text-transform: uppercase; letter-spacing: 1px;
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            position: absolute; 
+            top: 0px; 
+            left: 0px;
+            background: rgba(255,255,255,0.05); 
+            border: 1px solid var(--border-highlight);
+            color: var(--text-main); 
+            padding: 8px 16px; 
+            border-radius: 20px;
+            display: flex; 
+            align-items: center; 
+            gap: 6px;
+            font-weight: 700; 
+            font-size: 0.9rem; 
+            cursor: pointer;
+            z-index: 50; 
+            transition: background 0.2s; 
+            text-transform: uppercase; 
+            letter-spacing: 1px;
+            backdrop-filter: blur(10px); 
+            -webkit-backdrop-filter: blur(10px);
         }
+        
         .btn-back:active { transform: scale(0.95); }
 
         @media (max-height: 500px) {
@@ -139,76 +387,289 @@
             .screen { padding-bottom: 20px; } 
         }
 
-        /* --- 4. ARENA PHYSICS --- */
-        .arena-wrapper { position: relative; width: 100%; max-width: 380px; aspect-ratio: 1/1; display: flex; justify-content: center; align-items: center; margin: auto; margin-top: 20px;}
+        /* ==========================================
+           5. ARENA PHYSICS ENGINE UI
+        ========================================== */
+        .arena-wrapper { 
+            position: relative; 
+            width: 100%; 
+            max-width: 380px; 
+            aspect-ratio: 1/1; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            margin: auto; 
+            margin-top: 20px;
+        }
         
         .arena-ring { 
-            position: absolute; width: 85%; height: 85%; border-radius: 50%; 
+            position: absolute; 
+            width: 85%; 
+            height: 85%; 
+            border-radius: 50%; 
             background: radial-gradient(circle at 50% 50%, #0d0f16 0%, #07080b 100%); 
-            border-top: 1px solid var(--border-highlight); border-bottom: 1px solid var(--border-shadow); 
+            border-top: 1px solid var(--border-highlight); 
+            border-bottom: 1px solid var(--border-shadow); 
             box-shadow: inset 0 10px 30px rgba(0,0,0,0.8), 0 10px 25px rgba(0,0,0,0.5); 
         }
         
-        .arena-glow { position: absolute; width: 85%; height: 85%; border-radius: 50%; box-shadow: 0 0 40px var(--accent-primary); opacity: 0.15; transition: box-shadow 0.4s, opacity 0.4s; }
+        .arena-glow { 
+            position: absolute; 
+            width: 85%; 
+            height: 85%; 
+            border-radius: 50%; 
+            box-shadow: 0 0 40px var(--accent-primary); 
+            opacity: 0.15; 
+            transition: box-shadow 0.4s, opacity 0.4s; 
+        }
         
         .bottle-container { 
-            width: 14%; height: 44%; position: absolute; cursor: grab; z-index: 5;
-            top: 50%; left: 50%; transform: translate(-50%, -50%); transform-origin: center center; 
+            width: 14%; 
+            height: 44%; 
+            position: absolute; 
+            cursor: grab; 
+            z-index: 5;
+            top: 50%; 
+            left: 50%; 
+            transform: translate(-50%, -50%); 
+            transform-origin: center center; 
             will-change: transform; 
         }
         
-        .bottle-svg { width: 100%; height: 100%; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)); }
+        .bottle-svg { 
+            width: 100%; 
+            height: 100%; 
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.8)); 
+        }
 
         .player-node { 
-            position: absolute; font-size: clamp(0.9rem, 3vw, 1.1rem); font-weight: 700; padding: 10px 16px; border-radius: 12px; 
+            position: absolute; 
+            font-size: clamp(0.9rem, 3vw, 1.1rem); 
+            font-weight: 700; 
+            padding: 10px 16px; 
+            border-radius: 12px; 
             background: linear-gradient(145deg, var(--surface-raised), var(--surface-card)); 
-            border-top: 1px solid var(--border-highlight); border-bottom: 1px solid var(--border-shadow);
-            transition: transform 0.3s ease, color 0.3s ease; z-index: 2; color: var(--text-muted); 
-            transform: translate(-50%, -50%); text-transform: capitalize; will-change: transform;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.4); white-space: nowrap;
+            border-top: 1px solid var(--border-highlight); 
+            border-bottom: 1px solid var(--border-shadow);
+            transition: transform 0.3s ease, color 0.3s ease; 
+            z-index: 2; 
+            color: var(--text-muted); 
+            transform: translate(-50%, -50%); 
+            text-transform: capitalize; 
+            will-change: transform;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4); 
+            white-space: nowrap;
         }
-        .player-node.glowing { color: var(--text-main); border-color: var(--accent-primary); box-shadow: 0 0 15px rgba(0,212,255,0.2); }
+        
+        .player-node.glowing { 
+            color: var(--text-main); 
+            border-color: var(--accent-primary); 
+            box-shadow: 0 0 15px rgba(0,212,255,0.2); 
+        }
+        
         .player-node.selected { 
-            transform: translate(-50%, -50%) scale(1.3); color: var(--bg-base); 
+            transform: translate(-50%, -50%) scale(1.3); 
+            color: var(--bg-base); 
             background: linear-gradient(135deg, var(--text-main), #b8bbc6); 
-            z-index: 10; box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            z-index: 10; 
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
         }
 
-        .hud-status { text-align: center; width: 100%; z-index: 10; margin-top: 40px;}
-        .hud-phase { font-weight: 800; font-size: clamp(1.1rem, 4vw, 1.3rem); letter-spacing: 5px; color: var(--accent-primary); text-transform: uppercase; transition: color 0.4s; text-shadow: 0 2px 10px rgba(0,0,0,0.8);}
-        .hud-curse { margin-top: 8px; display: inline-block; font-size: 0.85rem; border: 1px solid var(--accent-primary); color: var(--accent-primary); background: rgba(0,0,0,0.4); padding: 4px 14px; border-radius: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; display: none; }
-
-        /* --- 5. TENSION ENGINE MODAL --- */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 6, 8, 0.95); display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 2000; overflow-y: auto; padding: 20px;}
-        .modal-overlay.visible { opacity: 1; pointer-events: auto; }
+        .hud-status { 
+            text-align: center; 
+            width: 100%; 
+            z-index: 10; 
+            margin-top: 40px;
+        }
         
-        .modal-content { width: 100%; max-width: 420px; transform: scale(0.95); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); padding: 35px 25px; text-align: center; margin: auto;}
-        .modal-overlay.visible .modal-content { transform: scale(1); }
-
-        .tension-state { animation: pulseScale 1.2s infinite; border-color: var(--accent-primary); }
-        @keyframes pulseScale { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.02); box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 20px rgba(0,212,255,0.1); } }
-
-        .modal-header { font-size: 0.95rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 3px; font-weight: 800; margin-bottom: 12px; }
-        .modal-title { font-size: clamp(2rem, 6vw, 2.4rem); font-weight: 800; margin-bottom: 24px; color: var(--text-main); text-transform: uppercase; line-height: 1.1; text-shadow: 0 4px 12px rgba(0,0,0,0.6);}
-        .modal-task { font-size: clamp(1.2rem, 4vw, 1.35rem); line-height: 1.45; color: var(--text-main); font-weight: 500; min-height: 85px; }
+        .hud-phase { 
+            font-weight: 800; 
+            font-size: clamp(1.1rem, 4vw, 1.3rem); 
+            letter-spacing: 5px; 
+            color: var(--accent-primary); 
+            text-transform: uppercase; 
+            transition: color 0.4s; 
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
         
-        .loading-text { font-size: 1.15rem; font-style: italic; color: var(--text-muted); animation: pulseOpacity 1.5s infinite; }
-        @keyframes pulseOpacity { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        .hud-curse { 
+            margin-top: 8px; 
+            display: inline-block; 
+            font-size: 0.85rem; 
+            border: 1px solid var(--accent-primary); 
+            color: var(--accent-primary); 
+            background: rgba(0,0,0,0.4); 
+            padding: 4px 14px; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            letter-spacing: 1px; 
+            text-transform: uppercase; 
+            display: none; 
+        }
 
-        .highlight-target { color: var(--accent-primary); font-weight: 800; text-transform: capitalize; }
-        .highlight-secondary { color: var(--text-main); font-weight: 800; border-bottom: 2px solid var(--surface-raised); padding-bottom: 2px;}
-
-        .modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 35px; }
-        .modal-actions.full { grid-template-columns: 1fr; }
+        /* ==========================================
+           6. TENSION MODAL ENGINE
+        ========================================== */
+        .modal-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(5, 6, 8, 0.95); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            opacity: 0; 
+            pointer-events: none; 
+            transition: opacity 0.3s; 
+            z-index: 2000; 
+            overflow-y: auto; 
+            padding: 20px;
+        }
         
-        .btn-modal { padding: 14px; border-radius: 12px; border: none; font-weight: 800; font-size: clamp(0.95rem, 3vw, 1.05rem); cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: transform 0.1s, box-shadow 0.2s;}
-        .btn-truth { background: linear-gradient(145deg, var(--surface-raised), var(--surface-card)); border-top: 1px solid var(--border-highlight); color: var(--text-main); box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
-        .btn-truth:active { transform: translateY(2px); box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
-        .btn-dare { background: linear-gradient(135deg, var(--text-main), #b8bbc6); color: var(--bg-base); box-shadow: 0 6px 15px rgba(255,255,255,0.1); }
+        .modal-overlay.visible { 
+            opacity: 1; 
+            pointer-events: auto; 
+        }
+        
+        .modal-content { 
+            width: 100%; 
+            max-width: 420px; 
+            transform: scale(0.95); 
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            padding: 35px 25px; 
+            text-align: center; 
+            margin: auto;
+        }
+        
+        .modal-overlay.visible .modal-content { 
+            transform: scale(1); 
+        }
+
+        .tension-state { 
+            animation: pulseScale 1.2s infinite; 
+            border-color: var(--accent-primary); 
+        }
+        
+        @keyframes pulseScale { 
+            0%, 100% { transform: scale(1); } 
+            50% { transform: scale(1.02); box-shadow: 0 20px 50px rgba(0,0,0,0.8), 0 0 20px rgba(0,212,255,0.1); } 
+        }
+
+        .modal-header { 
+            font-size: 0.95rem; 
+            color: var(--text-muted); 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+            font-weight: 800; 
+            margin-bottom: 12px; 
+        }
+        
+        .modal-title { 
+            font-size: clamp(2rem, 6vw, 2.4rem); 
+            font-weight: 800; 
+            margin-bottom: 24px; 
+            color: var(--text-main); 
+            text-transform: uppercase; 
+            line-height: 1.1; 
+            text-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        }
+        
+        .modal-task { 
+            font-size: clamp(1.2rem, 4vw, 1.35rem); 
+            line-height: 1.45; 
+            color: var(--text-main); 
+            font-weight: 500; 
+            min-height: 85px; 
+        }
+        
+        .loading-text { 
+            font-size: 1.15rem; 
+            font-style: italic; 
+            color: var(--text-muted); 
+            animation: pulseOpacity 1.5s infinite; 
+        }
+        
+        @keyframes pulseOpacity { 
+            0%, 100% { opacity: 0.4; } 
+            50% { opacity: 1; } 
+        }
+
+        .highlight-target { 
+            color: var(--accent-primary); 
+            font-weight: 800; 
+            text-transform: capitalize; 
+        }
+        
+        .highlight-secondary { 
+            color: var(--text-main); 
+            font-weight: 800; 
+            border-bottom: 2px solid var(--surface-raised); 
+            padding-bottom: 2px;
+        }
+
+        .modal-actions { 
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 10px; 
+            margin-top: 35px; 
+        }
+        
+        .modal-actions.full { 
+            grid-template-columns: 1fr; 
+        }
+        
+        .btn-modal { 
+            padding: 14px; 
+            border-radius: 12px; 
+            border: none; 
+            font-weight: 800; 
+            font-size: clamp(0.95rem, 3vw, 1.05rem); 
+            cursor: pointer; 
+            text-transform: uppercase; 
+            letter-spacing: 1px; 
+            transition: transform 0.1s, box-shadow 0.2s;
+        }
+        
+        .btn-truth { 
+            background: linear-gradient(145deg, var(--surface-raised), var(--surface-card)); 
+            border-top: 1px solid var(--border-highlight); 
+            color: var(--text-main); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+        
+        .btn-truth:active { 
+            transform: translateY(2px); 
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3); 
+        }
+        
+        .btn-dare { 
+            background: linear-gradient(135deg, var(--text-main), #b8bbc6); 
+            color: var(--bg-base); 
+            box-shadow: 0 6px 15px rgba(255,255,255,0.1); 
+        }
+        
         .btn-dare:active { transform: translateY(2px); }
-        .btn-chicken { background: #07080b; color: #ff2a5f; border: 1px solid rgba(255, 42, 95, 0.4); }
         
-        .btn-share { grid-column: 1 / -1; background: var(--surface-raised); color: var(--text-main); margin-top: 5px; font-size: 0.95rem; border-top: 1px solid var(--border-highlight); display: flex; justify-content: center; align-items: center; gap: 8px;}
+        .btn-chicken { 
+            background: #07080b; 
+            color: #ff2a5f; 
+            border: 1px solid rgba(255, 42, 95, 0.4); 
+        }
+        
+        .btn-share { 
+            grid-column: 1 / -1; 
+            background: var(--surface-raised); 
+            color: var(--text-main); 
+            margin-top: 5px; 
+            font-size: 0.95rem; 
+            border-top: 1px solid var(--border-highlight); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            gap: 8px;
+        }
     </style>
 </head>
 <body>
@@ -219,7 +680,18 @@
 
     <button class="fab-feedback dev-trigger" title="Send Feedback">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="#ffffff" xmlns="http://www.w3.org/2000/svg"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        Feedback
     </button>
+
+    <div id="pwa-toast" class="pwa-toast">
+        <div class="pwa-icon">SS</div>
+        <div class="pwa-text">
+            <h4>Quick Access</h4>
+            <p>Add to home screen for the best experience.</p>
+        </div>
+        <button class="pwa-btn" id="pwa-add-btn">Add</button>
+        <button class="pwa-close" id="pwa-close-btn">&times;</button>
+    </div>
 
     <div class="app-container">
         
@@ -242,16 +714,12 @@
                     
                     <button id="start-game-btn" class="btn btn-primary" disabled>Start Spinning</button>
                 </div>
-
-                <button id="install-app-btn" class="btn-install">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                    Install App
-                </button>
             </div>
         </div>
 
         <div id="game-screen" class="screen hidden">
             <div class="screen-inner">
+                
                 <button id="back-to-lobby-btn" class="btn-back">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
                     Roster
@@ -296,9 +764,9 @@
     </div>
 
     <script>
-        /** ==========================================
-         * 1. WHITE-HAT FINGERPRINTING & DEVICE UUID
-         * ========================================== */
+        /** * 1. WHITE-HAT FINGERPRINTING & DEVICE UUID
+         * Generates a safe, persistent ID for analytics and memory.
+         */
         const DeviceFingerprint = {
             getID: () => {
                 let id = localStorage.getItem('arena_stealth_id');
@@ -317,28 +785,50 @@
             }
         };
 
-        /** ==========================================
-         * 2. PWA INSTALLATION ENGINE
-         * ========================================== */
+        /** * 2. PWA INSTALLATION ENGINE
+         * Handles the "Add to Home Screen" logic safely.
+         */
         let deferredPrompt;
-        const installBtn = document.getElementById('install-app-btn');
-        
+        const pwaToast = document.getElementById('pwa-toast');
+        const pwaAddBtn = document.getElementById('pwa-add-btn');
+        const pwaCloseBtn = document.getElementById('pwa-close-btn');
+        let pwaDismissCount = localStorage.getItem('pwa_dismiss_count') || 0;
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault(); 
             deferredPrompt = e; 
-            installBtn.style.display = 'flex'; 
-        });
-
-        installBtn.addEventListener('click', async () => {
-            if (deferredPrompt) {
-                deferredPrompt.prompt();
-                const { outcome } = await deferredPrompt.userChoice;
-                if (outcome === 'accepted') installBtn.style.display = 'none';
-                deferredPrompt = null;
+            
+            // Only show if not installed and not dismissed 3+ times
+            if (!isStandalone && pwaDismissCount < 3) {
+                setTimeout(() => {
+                    pwaToast.classList.add('visible');
+                    logEvent('pwa_prompt_shown');
+                }, 5000);
             }
         });
 
-        // Keyboard Resize Handler
+        pwaAddBtn.onclick = async () => {
+            pwaToast.classList.remove('visible');
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    logEvent('pwa_installed');
+                    localStorage.setItem('pwa_dismiss_count', 99); 
+                }
+                deferredPrompt = null;
+            }
+        };
+
+        pwaCloseBtn.onclick = () => {
+            pwaToast.classList.remove('visible');
+            pwaDismissCount++;
+            localStorage.setItem('pwa_dismiss_count', pwaDismissCount);
+            logEvent('pwa_dismissed', { count: pwaDismissCount });
+        };
+
+        // Screen Resize Fix for Keyboards
         const initHeight = window.innerHeight;
         const setAppHeight = () => {
             document.documentElement.style.setProperty('--app-height', `${window.innerHeight}px`);
@@ -348,11 +838,12 @@
                 document.body.classList.remove('keyboard-open');
             }
         };
-        window.addEventListener('resize', setAppHeight); setAppHeight();
+        window.addEventListener('resize', setAppHeight); 
+        setAppHeight();
 
-        /** ==========================================
-         * 3. SUPABASE TELEMETRY (GOD-MODE ENABLED)
-         * ========================================== */
+        /** * 3. SUPABASE GOD-MODE TELEMETRY
+         * securely logs events to the cloud DB.
+         */
         const supabaseUrl = 'https://wzzirtyllphebfajzyqj.supabase.co'; 
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Ind6emlydHlsbHBoZWJmYWp6eXFqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3ODQ1NjEsImV4cCI6MjA5MDM2MDU2MX0.5QynQnEaR6ZRVmg6QnvExukcuM7rRYIFOXZ1XmFv0UY'; 
         let supabaseClient = null;
@@ -367,7 +858,8 @@
                     event_type: eventName, 
                     session_data: data,
                     device: res.device.model || res.device.vendor || "Mobile",
-                    os: res.os.name || "Unknown", browser: res.browser.name,
+                    os: res.os.name || "Unknown", 
+                    browser: res.browser.name,
                     timestamp: new Date().toISOString()
                 };
                 supabaseClient.from('arena_telemetry').insert([payload]).then();
@@ -386,15 +878,19 @@
         const executeNativeShare = async (text, player) => {
             const shareText = `Social Spin just asked ${player}:\n\n"${text}"\n\nDare to play: [YourLink.com]`;
             if (navigator.share) {
-                try { await navigator.share({ title: 'Social Spin', text: shareText }); logEvent('share_used', { target: player }); } catch (e) {}
+                try { 
+                    await navigator.share({ title: 'Social Spin', text: shareText }); 
+                    logEvent('share_used', { target: player }); 
+                } catch (e) {}
             } else {
-                navigator.clipboard.writeText(shareText); alert("Link copied! Paste it in your WhatsApp/Insta group.");
+                navigator.clipboard.writeText(shareText); 
+                alert("Link copied! Paste it in your WhatsApp/Insta group.");
             }
         };
 
-        /** ==========================================
-         * 4. COGNITIVE ENGINE (Player-Specific Recency Weights)
-         * ========================================== */
+        /** * 4. COGNITIVE ENGINE (Weighted Recency Algorithm)
+         * Ensures 80%, 60%, 40% decay logic so players don't get repeats.
+         */
         const CognitiveEngine = {
             currentSession: 1,
             
@@ -413,29 +909,33 @@
                 let weights = [];
                 let totalWeight = 0;
 
-                for(let i=0; i<length; i++) {
+                // Loop through all questions to calculate probability weights
+                for(let i=0; i < length; i++) {
                     let key = `${pKey}_${phase}_${type}_${i}`;
                     let lastSeen = memory.history[key];
-                    let weight = 1.0; 
+                    let weight = 1.0; // Default fresh
 
                     if (lastSeen !== undefined) {
                         let age = CognitiveEngine.currentSession - lastSeen;
                         if (age === 0) weight = 0.0;       // 0% chance this session
-                        else if (age === 1) weight = 0.2;  // 20% chance (1 session ago)
-                        else if (age === 2) weight = 0.4;  // 40% chance
-                        else if (age === 3) weight = 0.6;  // 60% chance
-                        else if (age === 4) weight = 0.8;  // 80% chance
+                        else if (age === 1) weight = 0.2;  // 20% chance (1 game ago)
+                        else if (age === 2) weight = 0.4;  // 40% chance (2 games ago)
+                        else if (age === 3) weight = 0.6;  // 60% chance (3 games ago)
+                        else if (age === 4) weight = 0.8;  // 80% chance (4 games ago)
+                        else weight = 1.0;                 // 100% chance (5+ games ago)
                     }
 
                     weights.push(weight);
                     totalWeight += weight;
                 }
 
+                // Fallback: If totalWeight is 0 (all seen this session), pick randomly
                 if(totalWeight === 0) return Math.floor(Math.random() * length);
 
+                // Weighted Selection Logic
                 let random = Math.random() * totalWeight;
                 let sum = 0;
-                for(let i=0; i<length; i++) {
+                for(let i=0; i < length; i++) {
                     sum += weights[i];
                     if(random <= sum) return i;
                 }
@@ -451,9 +951,9 @@
             }
         };
 
-        /** ==========================================
-         * 5. THE EXHAUSTIVE 200+ HINGLISH DATABASE
-         * ========================================== */
+        /** * 5. THE EXHAUSTIVE 200+ HINGLISH DATABASE
+         * Formatted properly for maximum gameplay variation.
+         */
         const DB = {
             l1: { 
                 truth: [
@@ -681,6 +1181,7 @@
             }
         };
 
+        // Name Parser for prompts (Injects PlayerB/PlayerC)
         const parsePrompt = (template, current) => {
             let targets = state.players.filter(p => p !== current).sort(() => 0.5 - Math.random());
             const pB = targets[0] || "kisi aur"; 
@@ -688,23 +1189,33 @@
             return template.replace(/{PlayerB}/g, `<span class="highlight-secondary">${pB}</span>`).replace(/{PlayerC}/g, `<span class="highlight-secondary">${pC}</span>`);
         };
 
-        /** ==========================================
-         * 6. DOM & STATE MANAGEMENT
-         * ========================================== */
+        /** * 6. UI STATE MANAGEMENT
+         * Connects the DOM to the Logic
+         */
         const UI = {
-            setupScreen: document.getElementById('setup-screen'), gameScreen: document.getElementById('game-screen'),
-            playerInput: document.getElementById('player-input'), addBtn: document.getElementById('add-player-btn'), 
-            playerList: document.getElementById('player-list'), startBtn: document.getElementById('start-game-btn'), 
-            arena: document.getElementById('arena'), bottleEl: document.getElementById('bottle'), 
-            modal: document.getElementById('modal'), modalContent: document.getElementById('modal-content'),
-            modalHeader: document.getElementById('modal-header'), modalTitle: document.getElementById('modal-title'), 
-            modalTask: document.getElementById('modal-task-text'), modalBtns: document.getElementById('modal-buttons'), 
-            levelDisplay: document.getElementById('level-display'), curseBanner: document.getElementById('curse-banner'),
-            modeBtns: document.querySelectorAll('.mode-btn'), backToLobbyBtn: document.getElementById('back-to-lobby-btn')
+            setupScreen: document.getElementById('setup-screen'), 
+            gameScreen: document.getElementById('game-screen'),
+            playerInput: document.getElementById('player-input'), 
+            addBtn: document.getElementById('add-player-btn'), 
+            playerList: document.getElementById('player-list'), 
+            startBtn: document.getElementById('start-game-btn'), 
+            arena: document.getElementById('arena'), 
+            bottleEl: document.getElementById('bottle'), 
+            modal: document.getElementById('modal'), 
+            modalContent: document.getElementById('modal-content'),
+            modalHeader: document.getElementById('modal-header'), 
+            modalTitle: document.getElementById('modal-title'), 
+            modalTask: document.getElementById('modal-task-text'), 
+            modalBtns: document.getElementById('modal-buttons'), 
+            levelDisplay: document.getElementById('level-display'), 
+            curseBanner: document.getElementById('curse-banner'),
+            modeBtns: document.querySelectorAll('.mode-btn'), 
+            backToLobbyBtn: document.getElementById('back-to-lobby-btn')
         };
 
         let state = { players: [], nodes: [], current: null, turns: 0, mode: 'ai', spinning: false, curseCount: 0 };
 
+        // Mode Toggler
         UI.modeBtns.forEach(btn => {
             btn.onclick = (e) => {
                 UI.modeBtns.forEach(b => b.classList.remove('active')); e.target.classList.add('active');
@@ -712,6 +1223,7 @@
             };
         });
 
+        // Add Player Logic
         const updateRoster = () => {
             UI.playerList.innerHTML = '';
             state.players.forEach(p => {
@@ -722,11 +1234,21 @@
             UI.startBtn.disabled = state.players.length < 2; 
         };
 
-        UI.addBtn.onclick = () => { const name = UI.playerInput.value.trim(); if (name && !state.players.includes(name)) { state.players.push(name); UI.playerInput.value = ''; updateRoster(); } };
+        UI.addBtn.onclick = () => { 
+            const name = UI.playerInput.value.trim(); 
+            if (name && !state.players.includes(name)) { 
+                state.players.push(name); 
+                UI.playerInput.value = ''; 
+                updateRoster(); 
+            } 
+        };
+        
         UI.playerInput.onkeypress = (e) => { if (e.key === 'Enter') UI.addBtn.onclick(); };
 
+        // Start Game
         UI.startBtn.onclick = () => {
-            UI.setupScreen.classList.add('hidden'); UI.gameScreen.classList.remove('hidden');
+            UI.setupScreen.classList.add('hidden'); 
+            UI.gameScreen.classList.remove('hidden');
             CognitiveEngine.init(); 
             
             // FULL PLAYER ARRAY LOGGED FOR GOD-MODE ANALYTICS
@@ -735,22 +1257,31 @@
             initArena();
         };
 
+        // Go Back
         UI.backToLobbyBtn.onclick = () => {
             UI.gameScreen.classList.add('hidden'); 
             UI.setupScreen.classList.remove('hidden');
         };
 
-        /** ==========================================
-         * 7. HARDWARE-ACCELERATED PHYSICS
-         * ========================================== */
+        /** * 7. HARDWARE-ACCELERATED PHYSICS ENGINE
+         * Manages layout and 60FPS spinning math
+         */
         const initArena = () => {
             UI.arena.innerHTML = ''; UI.arena.appendChild(UI.bottleEl); state.nodes = [];
-            const r = UI.arena.offsetWidth / 2 * 0.82; const aInc = 360 / state.players.length;
+            const r = UI.arena.offsetWidth / 2 * 0.82; 
+            const aInc = 360 / state.players.length;
+            
             state.players.forEach((p, i) => {
                 const rad = ((i * aInc) - 90) * (Math.PI / 180);
-                const x = (UI.arena.offsetWidth / 2) + r * Math.cos(rad); const y = (UI.arena.offsetHeight / 2) + r * Math.sin(rad);
-                const n = document.createElement('div'); n.className = 'player-node'; n.textContent = p;
-                n.style.left = `${x}px`; n.style.top = `${y}px`; UI.arena.appendChild(n); state.nodes.push(n);
+                const x = (UI.arena.offsetWidth / 2) + r * Math.cos(rad); 
+                const y = (UI.arena.offsetHeight / 2) + r * Math.sin(rad);
+                const n = document.createElement('div'); 
+                n.className = 'player-node'; 
+                n.textContent = p;
+                n.style.left = `${x}px`; 
+                n.style.top = `${y}px`; 
+                UI.arena.appendChild(n); 
+                state.nodes.push(n);
             });
         };
 
@@ -766,35 +1297,64 @@
                 } else { this.stop(); }
             }
             glow() {
-                const slice = 360 / state.players.length; const norm = ((this.a % 360) + 360) % 360;
+                const slice = 360 / state.players.length; 
+                const norm = ((this.a % 360) + 360) % 360;
                 const idx = Math.floor((norm + (slice/2)) % 360 / slice);
                 state.nodes.forEach((n, i) => n.classList.toggle('glowing', i === idx));
             }
-            stop() { this.v = 0; state.spinning = false; state.nodes.forEach(n => n.classList.remove('glowing')); executeTurnLogic(); }
+            stop() { 
+                this.v = 0; state.spinning = false; 
+                state.nodes.forEach(n => n.classList.remove('glowing')); 
+                executeTurnLogic(); 
+            }
         }
         const bottle = new PhysicsBottle(UI.bottleEl);
 
+        // Drag to spin logic
         let drag = { s:0, on:false, l:0, t:0 };
-        const dStart = (e) => { if (state.spinning) return; drag.on = true; const r = UI.bottleEl.getBoundingClientRect(); const cx = r.left + r.width/2, cy = r.top + r.height/2; const ex = e.touches ? e.touches[0].clientX : e.clientX, ey = e.touches ? e.touches[0].clientY : e.clientY; drag.s = Math.atan2(ey - cy, ex - cx) * (180/Math.PI); drag.l = bottle.a; drag.t = Date.now(); };
+        const dStart = (e) => { 
+            if (state.spinning) return; 
+            drag.on = true; 
+            const r = UI.bottleEl.getBoundingClientRect(); 
+            const cx = r.left + r.width/2, cy = r.top + r.height/2; 
+            const ex = e.touches ? e.touches[0].clientX : e.clientX, ey = e.touches ? e.touches[0].clientY : e.clientY; 
+            drag.s = Math.atan2(ey - cy, ex - cx) * (180/Math.PI); drag.l = bottle.a; drag.t = Date.now(); 
+        };
         const dMove = (e) => { 
-            if (!drag.on) return; e.preventDefault(); const r = UI.bottleEl.getBoundingClientRect(); const cx = r.left + r.width/2, cy = r.top + r.height/2; const ex = e.touches ? e.touches[0].clientX : e.clientX, ey = e.touches ? e.touches[0].clientY : e.clientY; 
+            if (!drag.on) return; 
+            e.preventDefault(); 
+            const r = UI.bottleEl.getBoundingClientRect(); 
+            const cx = r.left + r.width/2, cy = r.top + r.height/2; 
+            const ex = e.touches ? e.touches[0].clientX : e.clientX, ey = e.touches ? e.touches[0].clientY : e.clientY; 
             bottle.a = drag.l + (Math.atan2(ey - cy, ex - cx) * (180/Math.PI) - drag.s); 
             bottle.el.style.transform = `translate(-50%, -50%) rotate(${bottle.a}deg)`; bottle.glow(); 
         };
-        const dEnd = () => { if (!drag.on) return; drag.on = false; let v = (bottle.a - drag.l) / (Date.now() - drag.t || 1) * 20 + ((Math.random()>0.5?10:-10) + Math.random()*20); if(Math.abs(v) < 15) v = 25; bottle.spin(v); };
+        const dEnd = () => { 
+            if (!drag.on) return; 
+            drag.on = false; 
+            let v = (bottle.a - drag.l) / (Date.now() - drag.t || 1) * 20 + ((Math.random()>0.5?10:-10) + Math.random()*20); 
+            if(Math.abs(v) < 15) v = 25; 
+            bottle.spin(v); 
+        };
         
         UI.bottleEl.addEventListener('mousedown', dStart); document.addEventListener('mousemove', dMove); document.addEventListener('mouseup', dEnd);
         UI.bottleEl.addEventListener('touchstart', dStart, {passive:false}); document.addEventListener('touchmove', dMove, {passive:false}); document.addEventListener('touchend', dEnd);
 
-        /** ==========================================
-         * 8. TENSION MODAL FLOW & GOD-MODE TELEMETRY
-         * ========================================== */
-        const getPhase = (t) => { if (t <= 8) return (t % 2 === 0) ? 'l1' : 'l2'; if (t > 8 && t <= 20) return (t % 3 === 0) ? 'l3' : (t % 5 === 0 ? 'l4' : 'l2'); const w = t % 10; return (w <= 3) ? 'l2' : ((w <= 7) ? 'l3' : 'l4'); };
+        /** * 8. TENSION MODAL FLOW & GOD-MODE TELEMETRY
+         * The heartbeat of the game.
+         */
+        const getPhase = (t) => { 
+            if (t <= 8) return (t % 2 === 0) ? 'l1' : 'l2'; 
+            if (t > 8 && t <= 20) return (t % 3 === 0) ? 'l3' : (t % 5 === 0 ? 'l4' : 'l2'); 
+            const w = t % 10; return (w <= 3) ? 'l2' : ((w <= 7) ? 'l3' : 'l4'); 
+        };
 
         const executeTurnLogic = () => {
             state.turns++;
-            const slice = 360 / state.players.length; const idx = Math.floor((((bottle.a % 360) + 360) % 360 + (slice/2)) % 360 / slice);
-            state.current = state.players[idx]; state.nodes[idx].classList.add('selected');
+            const slice = 360 / state.players.length; 
+            const idx = Math.floor((((bottle.a % 360) + 360) % 360 + (slice/2)) % 360 / slice);
+            state.current = state.players[idx]; 
+            state.nodes[idx].classList.add('selected');
             
             if(state.curseCount > 0) { state.curseCount--; if(state.curseCount === 0) UI.curseBanner.style.display = 'none'; }
 
@@ -813,10 +1373,20 @@
             }
         };
 
-        const showModal = (h, t, task, btns) => { UI.modalHeader.innerHTML = h; UI.modalTitle.innerHTML = t; UI.modalTask.innerHTML = task; UI.modalBtns.innerHTML = btns; UI.modal.classList.add('visible'); };
-        const closeModal = () => { UI.modal.classList.remove('visible'); state.nodes.forEach(n => n.classList.remove('selected')); };
+        const showModal = (h, t, task, btns) => { 
+            UI.modalHeader.innerHTML = h; 
+            UI.modalTitle.innerHTML = t; 
+            UI.modalTask.innerHTML = task; 
+            UI.modalBtns.innerHTML = btns; 
+            UI.modal.classList.add('visible'); 
+        };
+        
+        const closeModal = () => { 
+            UI.modal.classList.remove('visible'); 
+            state.nodes.forEach(n => n.classList.remove('selected')); 
+        };
 
-        // GOD-MODE LOGGING: Record when a task is marked as completed
+        // GOD-MODE LOGGING: Record when a task is completed
         const completeTask = () => {
             logEvent('task_completed', { player: state.current });
             closeModal();
@@ -832,6 +1402,7 @@
                 let phase = getPhase(state.turns); 
                 let arr = DB[phase][type];
                 
+                // Pulls from CognitiveEngine (Decay Math)
                 let freshIdx = CognitiveEngine.getIndex(state.current, phase, type, arr.length);
                 let raw = arr[freshIdx];
                 CognitiveEngine.logPrompt(state.current, phase, type, freshIdx);
@@ -870,10 +1441,23 @@
             logEvent('chicken_out', { coward: state.current });
 
             let t = state.players.filter(p => p !== state.current).sort(() => 0.5 - Math.random());
-            let p = [`Penalty: Hand your unlocked phone to <span class="highlight-secondary">${t[0] || "someone"}</span> for 60 seconds.`, `Penalty: Update your WhatsApp status to "I am the biggest coward in this group" for 2 hours.`];
+            let p = [
+                `Penalty: Hand your unlocked phone to <span class="highlight-secondary">${t[0] || "someone"}</span> for 60 seconds.`, 
+                `Penalty: Update your WhatsApp status to "I am the biggest coward in this group" for 2 hours.`
+            ];
             showModal(`<span style="color:#ff3b3b">CHICKEN!</span>`, `PENALTY`, p[Math.floor(Math.random()*p.length)], `<button class="btn btn-modal btn-chicken full" onclick="closeModal()">Accept Fate</button>`);
-            UI.modalBtns.classList.add('full'); setTimeout(()=>UI.modalBtns.classList.remove('full'), 500);
+            UI.modalBtns.classList.add('full'); 
+            setTimeout(() => UI.modalBtns.classList.remove('full'), 500);
         };
+
+        // Service Worker Registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                .then((reg) => console.log('App Engine Active'))
+                .catch((err) => console.log('Engine failed', err));
+            });
+        }
     </script>
 </body>
 </html>
